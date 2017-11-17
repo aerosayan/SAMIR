@@ -168,6 +168,10 @@ def tokenizerStdV1(data):
 			lexd.append(sv.LINE)
 			t = ''
 			continue
+		elif(t == 'SPLINE'):
+			lexd.append(sv.SPLINE)
+			t = ''
+			continue
 		elif(t == 'NEW'):
 			lexd.append(sv.NEW)
 			t = ''

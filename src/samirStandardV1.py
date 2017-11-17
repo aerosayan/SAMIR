@@ -50,6 +50,7 @@ SPLICE = lex(name='SPLICE',uid=504);arlex.append(SPLICE);
 
 COLLECT = lex(name='COLLECT',uid=600);arlex.append(COLLECT);
 CAN_COLLECT = lex(name='CAN_COLLECT',uid=601);arlex.append(CAN_COLLECT);
+COLLECT_INDICES = lex(name='COLLECT_INDICES',uid=602);arlex.append(COLLECT_INDICES);
 
 #------------------------------------------------------------------------------
 # Integer and double variables and constant 
@@ -62,3 +63,7 @@ INT_CONST = recordtype('INT_CONST',[('constId','intConst'),('constData',0)  ,('u
 INT_VAR   = recordtype('INT_VAR'  ,[('varId','')          ,('varData',0)    ,('uid',INT_VAR_UID)  ])
 DBL_CONST = recordtype('DBL_CONST',[('constId','dblConst'),('constData',0.0),('uid',DBL_CONST_UID)])
 DBL_VAR   = recordtype('DBL_VAR'  ,[('varId','')          ,('varData',0.0)  ,('uid',DBL_VAR_UID)  ])
+
+basic_INT_CONST = INT_CONST(constId='basicIntConst')
+basic_DBL_CONST = DBL_CONST(constId='basicDblConst')
+
