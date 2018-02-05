@@ -58,7 +58,7 @@ INT_CONST_UID = 5000
 INT_VAR_UID = 5001
 DBL_CONST_UID = 5002
 DBL_VAR_UID = 5003
-
+# Depends on recordtype library
 INT_CONST = recordtype('INT_CONST',[('constId','intConst'),('constData',0)  ,('uid',INT_CONST_UID)])
 INT_VAR   = recordtype('INT_VAR'  ,[('varId','')          ,('varData',0)    ,('uid',INT_VAR_UID)  ])
 DBL_CONST = recordtype('DBL_CONST',[('constId','dblConst'),('constData',0.0),('uid',DBL_CONST_UID)])
@@ -67,3 +67,8 @@ DBL_VAR   = recordtype('DBL_VAR'  ,[('varId','')          ,('varData',0.0)  ,('u
 basic_INT_CONST = INT_CONST(constId='basicIntConst')
 basic_DBL_CONST = DBL_CONST(constId='basicDblConst')
 
+# Integration routines
+INTERP_LIN_UID = 6000 # Linear interpolation UID
+INTERP_CUB_UID = 6001 # Cubic interpolation UID
+
+# TODO : Interpolation recordtypes
