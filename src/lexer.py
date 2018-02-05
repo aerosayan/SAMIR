@@ -1,18 +1,38 @@
 import samirStandardV1 as sv
 
 
+#------------------------------------------------------------------------------ 
+# Delimiter string to be used for text processing
 DELSTR = ' ;,.()<>[]' # Every delimiter
 
+#------------------------------------------------------------------------------ 
+# Collect double value from the text data stream
+# \param xi: the postion from which the collection is to begin
+# \param lhs,rhs : left and right hand side bounds respectively,
+#        within which the collection is to be done 
+# \param data : The data from which the double is to be collected
 def collectDouble(xi,lhs,rhs,data):
 	dval = 0.0;
 	dval = float(data[xi-lhs+1:xi+rhs])
 	return dval
 
+#------------------------------------------------------------------------------ 
+# Collect integer value from the text data stream
+# \param xi: the postion from which the collection is to begin
+# \param lhs,rhs : left and right hand side bounds respectively,
+#        within which the collection is to be done 
+# \param data : The data from which the integer is to be collected
 def collectInteger(xi,lhs,rhs,data):
 	ival = 0;
 	ival = int(data[xi-lhs+1:xi+rhs])
 	return ival
 
+#------------------------------------------------------------------------------ 
+# Find the position of the next delimeter from the current position
+# \param xi: The position from which the search is to begin
+# \param data: The data within which the search is to be done
+# \param delstr: The string containing all the delimeters for which the search
+#        is to be performed
 def findNext(xi,data,delstr):
 	d = data[xi:] # Gather all data from the position xi to RHS
 	k = 0
@@ -25,7 +45,7 @@ def findNext(xi,data,delstr):
 		if( k != -1) and (k != 0): #{ k!=0 since we are wanting to find next one
 			delxi.append(k)
 		#} endif
-	#} end for loop over k in deltry
+    #} end for loop over k in deltry
 	if(delxi != []):
 		nextPos = min(delxi)
 		return nextPos # found
@@ -34,7 +54,12 @@ def findNext(xi,data,delstr):
 
 
 
-
+#------------------------------------------------------------------------------ 
+# Find the position of the previous delimeter from the current position
+# \param xi: The position from which the search is to begin
+# \param data: The data within which the search is to be done
+# \param delstr: The string containing all the delimeters for which the search
+#        is to be performed
 def findPrev(xi,data,delstr):
 	d = data[:xi+1] # Gather all data from the position xi to LHS [:xi+1] is
 	# used because python removes one letter forcibly during back splicing
@@ -42,11 +67,17 @@ def findPrev(xi,data,delstr):
 	prevPos = findNext(0,d,delstr)
 	return prevPos
 
+#------------------------------------------------------------------------------ 
+# Find the previous and the next delimeter position from the current position
+# \param xi: The position from which the search is to begin
 def findTokenBounds(xi,data):
 	rhs = findNext(xi,data,DELSTR)
 	lhs = findPrev(xi,data,DELSTR)
 	return lhs,rhs
 
+#------------------------------------------------------------------------------ 
+# Tokenize the data stream for further processing
+# \param data: The data of the  MIR file
 def tokenizerStdV1(data):
 	n = data.__len__()
 	c = ''; t = '';
@@ -90,11 +121,12 @@ def tokenizerStdV1(data):
 			prevdot = findPrev(I,data,'.') # MARK sometimes no dot are present before
 			prevdel = findPrev(I,data,DELSTR)
 			nextdel = findNext(I,data,DELSTR)
-
 			#print('nextdot : '+str(nextdot))
 			#print('nextdel : '+str(nextdel))
 			#print('prevdot : '+str(prevdot))
 			#print('prevdel : '+str(prevdel))
+
+	# Finding integer
 			if(nextdel != nextdot and prevdel != prevdot ): # It is an interger const
 				#print('Found integer')
 				lhs,rhs = findTokenBounds(I,data)
@@ -103,6 +135,7 @@ def tokenizerStdV1(data):
 				lexd.append(sv.INT_CONST(constData=ival))
 				#print(ival)
 				i = I+rhs
+	# Finding double
 			elif(nextdel == nextdot): # It is double const
 				#print('Double encountered, dot at next del')
 				i = I+nextdot # set i so that the dot lexer will take care of it
@@ -216,15 +249,14 @@ def tokenizerStdV1(data):
 			lexd.append(sv.SPLICE)
 			t=''
 			continue
-		
-	#} end for loop over i	
+	#} end for loop over i  
 	return lexd
-#------------------------------------------------------------------------------	
+#------------------------------------------------------------------------------ 
 
 #------------------------------------------------------------------------------
 def lexerStdV1(data):
 	print('STARTING LEXER')
-	d  = data.upper()
-	lexd = tokenizerStdV1(d)
+	d  = data.upper() # convert all text to upper case
+	lexd = tokenizerStdV1(d) # send all text for tokenizing
 	return lexd
 #------------------------------------------------------------------------------
