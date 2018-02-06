@@ -101,6 +101,132 @@ def findSubdivVec(spObjPos,lexd):
 	return subdivVec
 
 #------------------------------------------------------------------------------
+# Sort by common vector
+# Sort the given vector by finding the common parts and coallascing them
+# eg 1,2 | 2,5 | 6,5 | 7,6 | should produce 1,2,5,6,7 for non periodic vec
+# for periodic case it should handle that too
+# eg 1,2 | 2,5 | 6,5 | 7,6 | 1,2 should produce 1,2,5,6,7,2,1 for non periodic vec
+def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
+	m = unsortedNodeVec.__len__()
+	sortedNodeVec = [] # placeholder
+
+	# [P,1,P,2,P,2,P,5,][P,6,P,5,P,7,P,6,][P,1,P,2] Periodic
+	# [P,1,P,2,P,2,P,5,][P,6,P,5,P,7,P,6,] Non-Periodic 
+	# therefore for Periodic m mod 8 = 2
+	# and for Non periodic m mod 8 = 0
+	
+	# Periodicity test
+	if(m%8 ==2 and isPeriodic_BC):
+		pass # Periodic
+	elif(m%8 ==0 and ~isPeriodic_BC):
+		pass # Non-periodic
+	else:
+		#TODO : Possible source of error while using periodic bc . Fix it later
+		print('ERR : m%8 = 0 and isPeriodic_BC = True are contradictory')
+		exit()
+	
+	# Sorting loop
+	i = 0
+	while i<(m - m%8): # Only loop upto m-2-1 if periodic or m-1 if non periodic
+		I = i
+		i = i+8
+		# Generate the points
+		P1 = unsortedNodeVec[I+1]
+		P2 = unsortedNodeVec[I+3]
+		P3 = unsortedNodeVec[I+5]
+		P4 = unsortedNodeVec[I+7]
+		
+		# Flags
+		P1P3 = False
+		P1P4 = False
+		P2P3 = False
+		P2P4 = False
+
+		if(P1.constData == P3.constData):
+			P1P3 = True
+		elif(P1.constData == P4.constData):
+			P1P4 = True
+		elif(P2.constData == P3.constData):
+			P2P3 = True
+		elif(P2.constData == P4.constData):
+			P2P4 = True
+		else: # Discontinuity
+			print('ERR : Discontinuity in line splice')
+			exit()
+
+
+		# First loop : gather 3 numbers
+		# Rest of the loops : gather 2 numbers
+		if(I == 0): # gather 3 numbers
+			if(P1P3):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P2)
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P1) # or  P3
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P4)
+			elif(P1P4):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P2)
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P1) # or  P4
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P3)
+			elif(P2P3):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P1)
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P2) # or  P3
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P4)
+			elif(P2P4):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P1)
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P2) # or  P4
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P3)
+			#endif
+		elif(I > 0): # gather 2 numbers
+			if(P1P3):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P1) # or  P3
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P4)
+			elif(P1P4):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P1) # or  P4
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P3)
+			elif(P2P3):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P2) # or  P3
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P4)
+			elif(P2P4):
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P2) # or  P4
+				sortedNodeVec.append(sv.POINT)
+				sortedNodeVec.append(P3)
+			#endif
+		else: #I < 0 ?
+			print('WLeF! Have you done? XD')
+			print('ERR : Iterator < 0')
+			exit()
+		#endif I > or = 0 
+	#end while loop over i
+
+	# If periodic_BC does exist then handle it 
+	if(isPeriodic_BC):
+		sortedNodeVec.append(sv.POINT)
+		sortedNodeVec.append(sortedNodeVec[3])
+		sortedNodeVec.append(sv.POINT)
+		sortedNodeVec.append(sortedNodeVec[1])
+	#endif
+	return sortedNodeVec 
+
+
+#------------------------------------------------------------------------------
 # Find control node indices that will be then sorted and arranged 
 def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 	
@@ -134,34 +260,9 @@ def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 	#Sorting algorithm
 	n = unsortedNodeVec.__len__()
 	j = 1
-	P1 = 0
-	P2 = 0
+	sortedNodeVec = sortNodeVector(unsortedNodeVec,isPeriodic_BC)
 
-	while j<n:
-		J = j
-		if(unsortedNodeVec[J-1].uid == sv.POINT.uid):
-			P1 = unsortedNodeVec[J]
-			P2 = unsortedNodeVec[J+2]
-			P3 = unsortedNodeVec[j+4]
-			P4 = unsortedNodeVec[j+6]
-			if(P1.constData == P3.constData):
-				sortedNodeVec.append(sv.POINT)
-				sortedNodeVec.append(P2)
-				sortedNodeVec.append(sv.POINT)
-				sortedNodeVec.append(P1)
-				sortedNodeVec.append(sv.POINT)
-				sortedNodeVec.append(P4)
-				# go to next elements
-				j = j+8
-				print('WORK TODO HERE')
-				exit()
-			elif(P2.constData == P3.cosntData):
-				pass
-			#endif
-	if(isPeriodic_BC):
-		pass
-	#endif
-
+	return sortedNodeVec
 
 
 #------------------------------------------------------------------------------
@@ -193,7 +294,9 @@ def formWall(cmat,corder,corderpos,lexd):
 	# TODO : Generate wall as  2 numpy arrays and populate  them with x and y
 	# co-ordiantes respectively of the wall boundary
 
-	print(spObjPos)
+	print('------------------------SORTED NODE VEC -------------------------')
+	print(sortedNodeIndices)
+	print('------------------------SUBDIVISION VEC -------------------------')
 	print(subdivVec)
 	print('mark test')
 	exit()
