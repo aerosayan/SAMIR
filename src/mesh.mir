@@ -11,13 +11,11 @@ Point[6] = new Point(10.0,2.0);
 
 Line[1] = from Point(1,2)<<subdiv(1000)>>;
 Line[3] = from Point(2,5)<<subdiv(1000)>>;
-Line[9] = from Point(6,5)<<subdiv(1000)>>;
-Line[10] = from Point(7,6)<<subdiv(1000)>>;
 
 Line[2] = from Point(3,4)<<subdiv(1000)>>;
 Line[4] = from Point(4,6)<<subdiv(1000)>>;
 
-south_wall = new splice(from Point[1] to Point[5], by{Line[1,3,9,10]} );
+south_wall = new splice(from Point[1] to Point[5], by{Line[1,3]} );
 north_wall = new splice(from Point[3] to Point[6], by{Line[2,4]} );
 
 END;

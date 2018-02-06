@@ -80,6 +80,7 @@ def findSubdivVec(spObjPos,lexd):
 	m = spObjPos.__len__()
 	i = 0
 	subdivVec = []
+	subdivTypeVec = []
 	#subdivPosVec = []
 	while i<m:
 		I = i
@@ -95,10 +96,11 @@ def findSubdivVec(spObjPos,lexd):
 			exit()
 		else:
 			subdivVec.append(lexd[subdivPos+2])
+			subdivTypeVec.append(sv.INTERP_LIN_UID) # For now TODO : better way
 			#subdivPosVec.append(xi)
 		#endif
 	#end while
-	return subdivVec
+	return subdivVec,subdivTypeVec
 
 #------------------------------------------------------------------------------
 # Sort by common vector
@@ -112,17 +114,20 @@ def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 
 	# [P,1,P,2,P,2,P,5,][P,6,P,5,P,7,P,6,][P,1,P,2] Periodic
 	# [P,1,P,2,P,2,P,5,][P,6,P,5,P,7,P,6,] Non-Periodic 
-	# therefore for Periodic m mod 8 = 2
+	# therefore for Periodic m mod 8 = 2*2=4
+	# m mod 8 = 2*2=4 since the type of node is also added thus doubling the no.
 	# and for Non periodic m mod 8 = 0
 	
 	# Periodicity test
-	if(m%8 ==2 and isPeriodic_BC):
+	if(m%8 ==4 and isPeriodic_BC):
 		pass # Periodic
 	elif(m%8 ==0 and ~isPeriodic_BC):
+		print('m :',m)
 		pass # Non-periodic
 	else:
 		#TODO : Possible source of error while using periodic bc . Fix it later
-		print('ERR : m%8 = 0 and isPeriodic_BC = True are contradictory')
+		print('ERR : m%8 = 0 and isPeriodic_BC = True : are contradictory')
+		print('m :',m)
 		exit()
 	
 	# Sorting loop
@@ -218,10 +223,16 @@ def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 
 	# If periodic_BC does exist then handle it 
 	if(isPeriodic_BC):
-		sortedNodeVec.append(sv.POINT)
-		sortedNodeVec.append(sortedNodeVec[3])
-		sortedNodeVec.append(sv.POINT)
-		sortedNodeVec.append(sortedNodeVec[1])
+		# Make sure that discontinuities do not occur.
+		if(sortedNodeVec[-1] != sortedNodeVec[3]):
+			print('ERR : Discontinuity error for periodic boundary conditon')
+			print('sortedNodeVec[-1] : ',sortedNodeVec[-1])
+			print('sortedNodeVec[3] : ',sortedNodeVec[3])
+			print('ERR : Common node numbers are not found')
+			exit()
+		else: # since one node is already common thus we just add the last node
+			sortedNodeVec.append(sv.POINT)
+			sortedNodeVec.append(sortedNodeVec[1])
 	#endif
 	return sortedNodeVec 
 
@@ -266,6 +277,48 @@ def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 
 
 #------------------------------------------------------------------------------
+# Find Control node co-ordinates
+# Find the co-oridnates of the nodes that make up the wall
+def findControlNodeCoordinates(sortedNodeIndices,lexd):
+	m = sortedNodeIndices.__len__()
+	n = lexd.__len__()
+
+	x = []
+	y = []
+
+	i = 1
+	while i<m:
+		I = i
+		i = i+2
+		j = 0
+		while j<n:
+			J = j
+			j = j+1
+			lex = lexd[J]
+			if(lex.uid == sortedNodeIndices[I-1].uid): # find the operator type
+				if(lexd[J-1].uid == sv.SCOLON.uid): # find only primary operators
+					if(lexd[J+2].constData == sortedNodeIndices[I].constData): # data check
+						scolonPos = findNextLex(J,sv.SCOLON,lexd)
+						nodePos = findNextLex(J+1,sortedNodeIndices[I-1],lexd)
+						if(nodePos < scolonPos): # valid position check
+								x.append(float(lexd[nodePos+2].constData))
+								y.append(float(lexd[nodePos+4].constData))
+						else:
+							print('ERR : nodePos > scolonPos')
+							exit()
+						#endif nodePos and semi colon pos check
+					#endif const data check
+				#endif primary operator check
+			#endif operator type check
+		#end while loop over j
+	#end while loop over i
+
+	#print('x :',x)
+	#print('y :',y)
+	
+	return x,y
+	
+#------------------------------------------------------------------------------
 # Collect point indices from splice collection matrix and sort them in an 
 # unique vector
 def formWall(cmat,corder,corderpos,lexd):
@@ -287,19 +340,29 @@ def formWall(cmat,corder,corderpos,lexd):
 	#endif
 
 	# Find subdivision vector
-	subdivVec = findSubdivVec(spObjPos,lexd)
+	subdivVec,subidvTypeVec = findSubdivVec(spObjPos,lexd)
 
-	# TODO : Find and sort control node indices
+	# Find and sort control node indices
 	sortedNodeIndices= findControlNodeIndices(spObjPos,isPeriodic_BC,lexd)
-	# TODO : Generate wall as  2 numpy arrays and populate  them with x and y
-	# co-ordiantes respectively of the wall boundary
 
 	print('------------------------SORTED NODE VEC -------------------------')
 	print(sortedNodeIndices)
 	print('------------------------SUBDIVISION VEC -------------------------')
 	print(subdivVec)
-	print('mark test')
-	exit()
+
+	# TODO : Generate wall as  2 numpy arrays and populate  them with x and y
+	# co-ordiantes respectively of the wall boundary
+	xcoord,ycoord = findControlNodeCoordinates(sortedNodeIndices,lexd)
+	
+	print('-------------------CONTROL NODE CO-ORDINATES --------------------')
+	print('x :',xcoord)
+	print('y :',ycoord)
+
+	# TODO : subdivide subroutine possibly using numpy or C++
+	# work_here
+	#xwall,ywall = subdivide(sortedNodeVec,subdivVec,subdivType)
+
+
 #------------------------------------------------------------------------------
 # Prepare the splice objects 
 # TODO : Documentation
@@ -480,6 +543,15 @@ def parserStdV1(lexdata):
 	SOUTH_WALL_PROCESSED = False
 	NORTH_WALL_PROCESSED = False
 	i=0     
+
+	# Initial syntax check
+	if(lexd[0].uid != sv.BEGIN.uid):
+		print('ERR : MIR file should start with code BEGIN;')
+		exit()
+	elif(lexd[-2].uid != sv.END.uid):
+		print('ERR : MIR file should end with code END;')
+		exit()
+
 	while i<n:
 		I = i
 		c = lexd[I]
