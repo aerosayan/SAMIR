@@ -9,6 +9,9 @@ import samirStandardV1  as sv
 import lexer as lex
 import parser as par
 
+
+
+
 data = fr.readFile('mesh.mir')
 print('data saved')
 #print(data)

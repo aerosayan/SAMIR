@@ -1,4 +1,5 @@
 import samirStandardV1 as sv
+import data_wall as datWall
 
 #------------------------------------------------------------------------------
 # Find the next lex in the lex data stream
@@ -87,9 +88,6 @@ def subdivide(xcoord,ycoord,subdivVec,interpVec):
 		YWALL.append(y2) 
 
 	#end while loop over i
-	print('XWALL : ',XWALL)
-	print('YWALL : ',YWALL)
-	exit()
 	return XWALL,YWALL
 #------------------------------------------------------------------------------
 # Find splice object position in lexd 
@@ -433,6 +431,8 @@ def formWall(cmat,corder,corderpos,lexd):
 
 	# TODO : subdivide subroutine possibly using numpy or C++
 	xwall,ywall = subdivide(xcoord,ycoord,subdivVec,interpVec)
+	
+	return xwall,ywall
 
 
 #------------------------------------------------------------------------------
@@ -560,8 +560,10 @@ def collectSpliceObjectIndices(xi,collect,lexd):
 def verifyCFG(xi,cfg,collect,lexd):
 # MARKER :: __verifycfg
 	n = lexd.__len__()
-	i = xi # lexd iterator index
+	i = xi # lexd iterator index # The position of SOUTH_WALL
 	j=0 # cgf iterator index
+	xwall = []
+	ywall = []
 	while i<n: #{ 
 		I = i
 		i = i+1 # update lexd counter     
@@ -593,10 +595,11 @@ def verifyCFG(xi,cfg,collect,lexd):
 			#print(lexd[i]) # test to verifiy that we are skipping the lexemes
 
 			# TODO : Save or return the collected data
-			formWall(cmat,corder,corderpos,lexd)
-			print('exit mark2')
-			exit()
+			xwall,ywall = formWall(cmat,corder,corderpos,lexd)
 
+			# Skip over the collected positions in lexd
+			collectEndPos = findNextLex(I,sv.RCURL,lexd)
+			i = xi+collectEndPos
 		elif(c.uid == lexd[I].uid):
 			# cfg grammar verified print(c,' : is ok')
 			pass
@@ -608,7 +611,8 @@ def verifyCFG(xi,cfg,collect,lexd):
 			exit()
 		#endif
 	#} end while i<n loop
-	return 1
+	print('RETURNING')
+	return xwall,ywall
 
                 
 
@@ -642,10 +646,12 @@ def parserStdV1(lexdata):
 
 			collect = [sv.LINE,sv.SPLINE]
 			#print(cfg)
-
-			verifyCFG(I,cfg,collect,lexd)
-			print('EXIT mark1')     
-			exit()
+			
+			datWall.SOUTH_WALL_X,datWall.SOUTH_WALL_Y = verifyCFG(I,cfg,collect,lexd)
+			print('SOUTH WALL CREATED')
+			SOUTH_WALL_PROCESSED = True
+			print('XWALL : ',datWall.SOUTH_WALL_X)
+			print('YWALL : ',datWall.SOUTH_WALL_Y)
 		elif(c.uid == sv.NORTH_WALL.uid and SOUTH_WALL_PROCESSED == True and NORTH_WALL_PROCESSED == False):
 			print('PROCESSING NORTH_WALL ')
 
@@ -655,5 +661,11 @@ def parserStdV1(lexdata):
 			sv.RPAREN,sv.SCOLON]
 			
 			collect = [sv.LINE,sv.SPLINE]
+
+			datWall.NORTH_WALL_X,datWall.NORTH_WALL_Y = verifyCFG(I,cfg,collect,lexd)
+			print('NORTH WALL CREATED')
+			NORTH_WALL_PROCESSED = True
+			print('XWALL : ',datWall.NORTH_WALL_X)
+			print('YWALL : ',datWall.NORTH_WALL_Y)
 		#endif
 	return 0,0
