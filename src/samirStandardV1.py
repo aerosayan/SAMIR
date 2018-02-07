@@ -52,23 +52,58 @@ COLLECT = lex(name='COLLECT',uid=600);arlex.append(COLLECT);
 CAN_COLLECT = lex(name='CAN_COLLECT',uid=601);arlex.append(CAN_COLLECT);
 COLLECT_INDICES = lex(name='COLLECT_INDICES',uid=602);arlex.append(COLLECT_INDICES);
 
+LINTERP = lex(name='LINTERP',uid=700);arlex.append(LINTERP)
+CUBINTERP = lex(name='CUBINTERP',uid=701);arlex.append(CUBINTERP)
+
 #------------------------------------------------------------------------------
 # Integer and double variables and constant 
 INT_CONST_UID = 5000
 INT_VAR_UID = 5001
 DBL_CONST_UID = 5002
 DBL_VAR_UID = 5003
+
+
 # Depends on recordtype library
+# 3 fields are used for example
+# constId = intConst
+# constData = 0
+# uid = INT_CONST_UID
+
 INT_CONST = recordtype('INT_CONST',[('constId','intConst'),('constData',0)  ,('uid',INT_CONST_UID)])
 INT_VAR   = recordtype('INT_VAR'  ,[('varId','')          ,('varData',0)    ,('uid',INT_VAR_UID)  ])
 DBL_CONST = recordtype('DBL_CONST',[('constId','dblConst'),('constData',0.0),('uid',DBL_CONST_UID)])
 DBL_VAR   = recordtype('DBL_VAR'  ,[('varId','')          ,('varData',0.0)  ,('uid',DBL_VAR_UID)  ])
 
+# Two baisc instatntiation of the recordtype for easy use
 basic_INT_CONST = INT_CONST(constId='basicIntConst')
 basic_DBL_CONST = DBL_CONST(constId='basicDblConst')
 
+#------------------------------------------------------------------------------
 # Integration routines
-INTERP_LIN_UID = 6000 # Linear interpolation UID
-INTERP_CUB_UID = 6001 # Cubic interpolation UID
+INTERP_LINEAR_UID = 6000 # Linear interpolation UID
+INTERP_CUBIC_UID = 6001 # Cubic interpolation UID
 
 # TODO : Interpolation recordtypes
+# INTERP_LINEAR : for linear interpolation between two different node positions 
+# 		in the physical domain
+# INTERP_CUBIC  : for cubic spline interpolation between two different node
+#		positions in the physical domain
+
+# FIELDS : 
+# nodePos : the node positons in terms of percentage of total distance between 
+# 		the two different nodes. Total sum = 100
+# nodeDensity : the node density or no. of nodes in terms of percentage of total
+# 		numaber of nodes. Total sum = 100
+
+INTERP_LINEAR = recordtype('INTERP_LINEAR',[('nodePos',[]),('nodeDensity',[]),('lexdPos',-1)  ,('uid',INTERP_LINEAR_UID)])
+INTERP_CUBIC  = recordtype('INTERP_CUBIC' ,[('nodePos',[]),('nodeDensity',[]),('lexdPos',-1)  ,('uid',INTERP_CUBIC_UID) ])
+
+#------------------------------------------------------------------------------
+# Mesh block creation technique
+MESH_LINEAR_UID = 6100
+MESH_ELLIPTIC_UID = 6101
+MESH_PARABOLIC_UID = 6102
+MESH_HYPERBOLIC_UID = 6103
+MESH_TRIANGLE_UID = 6104
+
+# TODO : Mesh block creation technique recordtypes

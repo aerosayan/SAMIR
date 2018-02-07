@@ -80,8 +80,8 @@ def findSubdivVec(spObjPos,lexd):
 	m = spObjPos.__len__()
 	i = 0
 	subdivVec = []
-	subdivTypeVec = []
-	#subdivPosVec = []
+	interpVec = []
+	meshBlockTypeVec = []
 	while i<m:
 		I = i
 		i = i+1
@@ -96,11 +96,11 @@ def findSubdivVec(spObjPos,lexd):
 			exit()
 		else:
 			subdivVec.append(lexd[subdivPos+2])
-			subdivTypeVec.append(sv.INTERP_LIN_UID) # For now TODO : better way
-			#subdivPosVec.append(xi)
+			interpVec.append(sv.INTERP_LINEAR(lexdPos=subdivPos)) # TODO: Better way
+			meshBlockTypeVec.append(sv.MESH_LINEAR_UID) # For now TODO : better way
 		#endif
 	#end while
-	return subdivVec,subdivTypeVec
+	return subdivVec,interpVec,meshBlockTypeVec
 
 #------------------------------------------------------------------------------
 # Sort by common vector
@@ -339,8 +339,8 @@ def formWall(cmat,corder,corderpos,lexd):
 		#endif
 	#endif
 
-	# Find subdivision vector
-	subdivVec,subidvTypeVec = findSubdivVec(spObjPos,lexd)
+	# Find subdivision vector,interpolation type and mesh block type
+	subdivVec,interpVec,meshBlockType = findSubdivVec(spObjPos,lexd)
 
 	# Find and sort control node indices
 	sortedNodeIndices= findControlNodeIndices(spObjPos,isPeriodic_BC,lexd)
