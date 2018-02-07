@@ -1,12 +1,11 @@
 BEGIN;
 Point[1] = new Point(0.0,0.0);
-Point[2] = new Point(1.0,0.0);
+Point[2] = new Point(1.5,0.0);
+Point[5] = new Point(5.0,0.0);
 
-Point[3] = new Point(0.0,1.0);
-Point[4] = new Point(1.0,0.5);
-
-Point[5] = new Point(10.0,1.0);
-Point[6] = new Point(10.0,2.0);
+Point[3] = new Point(0.0,0.65);
+Point[4] = new Point(1.5,0.5);
+Point[6] = new Point(5.0,1.5);
 
 
 Line[1] = from Point(1,2)<<subdiv(4)>>;

@@ -1,4 +1,5 @@
 import samirStandardV1 as sv
+import numpy as np
 import data_wall as datWall
 
 #------------------------------------------------------------------------------
@@ -76,8 +77,8 @@ def subdivide(xcoord,ycoord,subdivVec,interpVec):
 			m = m + m0
 			n = n + n0
 
-			x = (m*x2 + n*x1)
-			y = (m*y2 + n*y1)
+			x = (m*x2 + n*x1)/(m+n)
+			y = (m*y2 + n*y1)/(m+n)
 
 			XWALL.append(x)
 			YWALL.append(y)
@@ -88,7 +89,7 @@ def subdivide(xcoord,ycoord,subdivVec,interpVec):
 		YWALL.append(y2) 
 
 	#end while loop over i
-	return XWALL,YWALL
+	return np.array(XWALL),np.array(YWALL)
 #------------------------------------------------------------------------------
 # Find splice object position in lexd 
 
@@ -617,7 +618,7 @@ def verifyCFG(xi,cfg,collect,lexd):
                 
 
 #------------------------------------------------------------------------------
-def parserStdV1(lexdata):
+def parserStdV1(lexdata,echo=False):
 # MARKER :: __parserstdv1
 	lexd = lexdata
 	n = lexd.__len__()
@@ -650,8 +651,6 @@ def parserStdV1(lexdata):
 			datWall.SOUTH_WALL_X,datWall.SOUTH_WALL_Y = verifyCFG(I,cfg,collect,lexd)
 			print('SOUTH WALL CREATED')
 			SOUTH_WALL_PROCESSED = True
-			print('XWALL : ',datWall.SOUTH_WALL_X)
-			print('YWALL : ',datWall.SOUTH_WALL_Y)
 		elif(c.uid == sv.NORTH_WALL.uid and SOUTH_WALL_PROCESSED == True and NORTH_WALL_PROCESSED == False):
 			print('PROCESSING NORTH_WALL ')
 
@@ -665,7 +664,12 @@ def parserStdV1(lexdata):
 			datWall.NORTH_WALL_X,datWall.NORTH_WALL_Y = verifyCFG(I,cfg,collect,lexd)
 			print('NORTH WALL CREATED')
 			NORTH_WALL_PROCESSED = True
-			print('XWALL : ',datWall.NORTH_WALL_X)
-			print('YWALL : ',datWall.NORTH_WALL_Y)
 		#endif
-	return 0,0
+
+	if(echo == True):
+		print('SOUTH_WALL_X : ',datWall.SOUTH_WALL_X)
+		print('SOUTH_WALL_Y : ',datWall.SOUTH_WALL_Y)
+		print('NORTH_WALL_X : ',datWall.NORTH_WALL_X)
+		print('NORTH_WALL_Y : ',datWall.NORTH_WALL_Y)
+	#endif
+	return 1
