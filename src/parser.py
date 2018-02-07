@@ -6,6 +6,7 @@ import samirStandardV1 as sv
 # \param toFind: The lexem to be found
 # \param lexd: Lex data stream
 def findNextLex(xi,toFind,lexd):
+# MARKER :: __findnextlex
 	n = lexd.__len__()
 	i = xi
 	found = False
@@ -27,9 +28,74 @@ def findNextLex(xi,toFind,lexd):
 
 
 #------------------------------------------------------------------------------
+# Subdivide the boundary nodes to form a wall
+def subdivide(xcoord,ycoord,subdivVec,interpVec):
+# MARKER :: __subdivide
+# TODO : handle all kinds of subdivision like linear and cubic spline interpolation
+	
+	# check if x and y wall co-ordinates vector are of same length
+	if(xcoord.__len__() != ycoord.__len__()):
+		print('ERR : xcoord and ycoord lengths do not match')
+		exit()
+	i = 0
+
+	XWALL = [] # final x co-ordinates
+	YWALL = [] # final y co-ordinates
+
+	while i<subdivVec.__len__():
+		I = i
+		i = i+1
+		
+
+		x1 = xcoord[I]
+		x2 = xcoord[I+1]
+		y1 = ycoord[I]
+		y2 = ycoord[I+1]
+
+		k = subdivVec[I].constData
+		m0 = float(1.0/k)
+		n0 = float((k-1)/k)
+
+
+		m = 0
+		n = 0
+
+		j = 0
+
+		# add the 1st control node x1 and y1
+		if(I == 0): # Prevents double insertion of x2 and y2 at every iteration
+			XWALL.append(x1) 
+			YWALL.append(y1) 
+		#endif 
+
+		while j<k-1: # loop k-1 times to create k-1 new nodes
+			J = j
+			j = j+1
+
+			m = m + m0
+			n = n + n0
+
+			x = (m*x2 + n*x1)
+			y = (m*y2 + n*y1)
+
+			XWALL.append(x)
+			YWALL.append(y)
+		#end while loop over k
+		
+		# add the control point x2 and y2
+		XWALL.append(x2) 
+		YWALL.append(y2) 
+
+	#end while loop over i
+	print('XWALL : ',XWALL)
+	print('YWALL : ',YWALL)
+	exit()
+	return XWALL,YWALL
+#------------------------------------------------------------------------------
 # Find splice object position in lexd 
 
 def findSpliceObjectPos(cmat,corder,lexd):
+# MARKER :: __findspliceobjectpos
 	m = corder.__len__()
 	o = lexd.__len__()
 	i = 0
@@ -71,17 +137,21 @@ def findSpliceObjectPos(cmat,corder,lexd):
 # TODO : Code it if it is needed.
 # But for now, we can use the lines and splice to form unique vector
 def findSpliceBounds():
+# MARKER :: __findsplicebounds
 	pass 
 
 #------------------------------------------------------------------------------
 # Find subdivision vector
-
 def findSubdivVec(spObjPos,lexd):
+# MARKER :: __findsubdivvec
 	m = spObjPos.__len__()
 	i = 0
+	# How much to subdivide each interval
 	subdivVec = []
+	# How to subdivide each interval
 	interpVec = []
-	meshBlockTypeVec = []
+	# What kind of mesh block is to be creatd for that interval
+	meshBlockVec = []
 	while i<m:
 		I = i
 		i = i+1
@@ -97,10 +167,10 @@ def findSubdivVec(spObjPos,lexd):
 		else:
 			subdivVec.append(lexd[subdivPos+2])
 			interpVec.append(sv.INTERP_LINEAR(lexdPos=subdivPos)) # TODO: Better way
-			meshBlockTypeVec.append(sv.MESH_LINEAR_UID) # For now TODO : better way
+			meshBlockVec.append(sv.MESH_LINEAR_UID) # For now TODO : better way
 		#endif
 	#end while
-	return subdivVec,interpVec,meshBlockTypeVec
+	return subdivVec,interpVec,meshBlockVec
 
 #------------------------------------------------------------------------------
 # Sort by common vector
@@ -109,6 +179,7 @@ def findSubdivVec(spObjPos,lexd):
 # for periodic case it should handle that too
 # eg 1,2 | 2,5 | 6,5 | 7,6 | 1,2 should produce 1,2,5,6,7,2,1 for non periodic vec
 def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
+# MARKER :: __sortnodevector
 	m = unsortedNodeVec.__len__()
 	sortedNodeVec = [] # placeholder
 
@@ -240,7 +311,7 @@ def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 #------------------------------------------------------------------------------
 # Find control node indices that will be then sorted and arranged 
 def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
-	
+# MARKER :: __findcontrolnodeindices	
 	m = spObjPos.__len__()
 	i = 0
 	unsortedNodeVec = []
@@ -280,6 +351,7 @@ def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 # Find Control node co-ordinates
 # Find the co-oridnates of the nodes that make up the wall
 def findControlNodeCoordinates(sortedNodeIndices,lexd):
+# MARKER :: __findcontrolnodecoordinates
 	m = sortedNodeIndices.__len__()
 	n = lexd.__len__()
 
@@ -322,6 +394,7 @@ def findControlNodeCoordinates(sortedNodeIndices,lexd):
 # Collect point indices from splice collection matrix and sort them in an 
 # unique vector
 def formWall(cmat,corder,corderpos,lexd):
+# MARKER :: __formwall
 	# Splice object positions
 	spObjPos = findSpliceObjectPos(cmat,corder,lexd)
 	isPeriodic_BC = False # Is a periodic BC present ?
@@ -340,7 +413,7 @@ def formWall(cmat,corder,corderpos,lexd):
 	#endif
 
 	# Find subdivision vector,interpolation type and mesh block type
-	subdivVec,interpVec,meshBlockType = findSubdivVec(spObjPos,lexd)
+	subdivVec,interpVec,meshBlockVec = findSubdivVec(spObjPos,lexd)
 
 	# Find and sort control node indices
 	sortedNodeIndices= findControlNodeIndices(spObjPos,isPeriodic_BC,lexd)
@@ -359,14 +432,14 @@ def formWall(cmat,corder,corderpos,lexd):
 	print('y :',ycoord)
 
 	# TODO : subdivide subroutine possibly using numpy or C++
-	# work_here
-	#xwall,ywall = subdivide(sortedNodeVec,subdivVec,subdivType)
+	xwall,ywall = subdivide(xcoord,ycoord,subdivVec,interpVec)
 
 
 #------------------------------------------------------------------------------
 # Prepare the splice objects 
 # TODO : Documentation
 def collectSpliceObjects(xi,forLex,lexd):
+# MARKER :: __collectspliceobjects
 	#cfg := [collectLex,sv.LSQR,sv.COLLECT_INDICES,sv.RSQR]
 	start = findNextLex(xi,sv.LSQR,lexd)
 	end = findNextLex(xi,sv.RSQR,lexd)
@@ -395,6 +468,7 @@ def collectSpliceObjects(xi,forLex,lexd):
 # \param collect: The lex which are allowed to be collected
 # \param lexd: The lex data stream
 def makeLexCollectionOrder(xi,collect,lexd):
+# MARKER :: __makecollectionorder
 	n = lexd.__len__()
 	m = collect.__len__()
 	i = xi
@@ -433,6 +507,7 @@ def makeLexCollectionOrder(xi,collect,lexd):
 # Collect the indices of all the objects that make up the splice
 # i.e collect indices of LINE,SPLINE,etc from the splice collection region.
 def collectSpliceObjectIndices(xi,collect,lexd):
+# MARKER :: __collectspliceobjectindices
 	n = lexd.__len__()
 	i = xi # lexd iterator index
 	j = 0 # collect iterator index
@@ -483,6 +558,7 @@ def collectSpliceObjectIndices(xi,collect,lexd):
 # Verify the pseudo Context Free Grammar ???? is it CFG???
 # and collect the data 
 def verifyCFG(xi,cfg,collect,lexd):
+# MARKER :: __verifycfg
 	n = lexd.__len__()
 	i = xi # lexd iterator index
 	j=0 # cgf iterator index
@@ -538,6 +614,7 @@ def verifyCFG(xi,cfg,collect,lexd):
 
 #------------------------------------------------------------------------------
 def parserStdV1(lexdata):
+# MARKER :: __parserstdv1
 	lexd = lexdata
 	n = lexd.__len__()
 	SOUTH_WALL_PROCESSED = False
@@ -557,7 +634,7 @@ def parserStdV1(lexdata):
 		c = lexd[I]
 		i = i+1
 		if(c.uid == sv.SOUTH_WALL.uid and SOUTH_WALL_PROCESSED == False):
-			print('SOUTH_WALL found')
+			print('PROCESSING SOUTH_WALL ')
 			cfg = [sv.SOUTH_WALL,sv.ASSIGN,sv.NEW,sv.SPLICE,sv.LPAREN,sv.FROM,
 			sv.POINT,sv.LSQR,sv.basic_INT_CONST,sv.RSQR,sv.TO,sv.POINT,sv.LSQR,
 			sv.basic_INT_CONST,sv.RSQR,sv.COMMA,sv.BY,sv.LCURL,sv.COLLECT,sv.RCURL,
@@ -570,7 +647,7 @@ def parserStdV1(lexdata):
 			print('EXIT mark1')     
 			exit()
 		elif(c.uid == sv.NORTH_WALL.uid and SOUTH_WALL_PROCESSED == True and NORTH_WALL_PROCESSED == False):
-			print('NORTH_WALL found')
+			print('PROCESSING NORTH_WALL ')
 
 			cfg = [sv.NORTH_WALL,sv.ASSIGN,sv.NEW,sv.SPLICE,sv.LPAREN,sv.FROM,
 			sv.POINT,sv.LSQR, sv.basic_INT_CONST,sv.RSQR,sv.TO,sv.POINT,sv.LSQR,
