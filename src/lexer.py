@@ -78,18 +78,21 @@ def findTokenBounds(xi,data):
 #------------------------------------------------------------------------------ 
 # Tokenize the data stream for further processing
 # \param data: The data of the  MIR file
-def tokenizerStdV1(data):
+def tokenizerStdV1(data_upper,data_original):
+	data = data_upper
 	n = data.__len__()
 	c = ''; t = '';
 	i = 0 # Iteration starts at zero
 	ni = 0 # next i
 	lexd = [] # Placeholder fot the lexeme form of the data
+	
+	isCollectingString = False
 
 	while i < n: #{
-		c = data[i] # current letter 
 		I = i
-		t = t + c # current token
 		i = i+1 # Update iteration counter
+		c = data[I] # current letter 
+		t = t + c # current token
 		if(c == ' '):
 			t=''
 			continue
@@ -107,6 +110,22 @@ def tokenizerStdV1(data):
 			lexd.append(sv.COMMA)
 			t= ''
 			continue
+		elif(c == '\"'):
+			# Very important :: Denotes that it is a string
+			# and dot(.) may be present inside it so we have to make sure that
+			# this dot is not processe as a double or otherwise it will cause
+			# an error when it tries to collec the string as a double
+			if(isCollectingString == False): # are we currently collecting string?
+				isCollectingString = True
+				strEndPos = findNext(I+1,data,'\"')
+				lexd.append( sv.STRING(stringData=str(data_original[I+1:I+strEndPos+1])) ) # It just works
+				i = I+strEndPos+1+1 # It just works
+				isCollectingString = False
+				#print(lexd[-1].stringData+'HAKUNA_MATATA')
+				#print(i)
+				#print(data[i]
+			#endif
+			continue
 		elif(c == '.'):
 			# find if the dot belongs to any double const`
 			lhs,rhs = findTokenBounds(I,data)
@@ -116,7 +135,9 @@ def tokenizerStdV1(data):
 			t= ''
 			i = I+rhs;
 			continue
+		# Finding numerical digits such as integers and doubles
 		elif(c.isdigit()== True):
+			#print('FOUND DIGIT :',c)
 			nextdot = findNext(I,data,'.')
 			prevdot = findPrev(I,data,'.') # MARK sometimes no dot are present before
 			prevdel = findPrev(I,data,DELSTR)
@@ -249,6 +270,34 @@ def tokenizerStdV1(data):
 			lexd.append(sv.SPLICE)
 			t=''
 			continue
+		elif(t == 'LERP'):
+			lexd.append(sv.LERP)
+			t=''
+			continue
+		elif(t == 'CERP'):
+			lexd.append(sv.CERP)
+			t=''
+			continue
+		elif(t == 'MESH_LINEAR'):
+			lexd.append(sv.MESH_LINEAR_LEX)
+			t=''
+			continue
+		elif(t == 'MESH_ELLIPTIC'):
+			lexd.append(sv.MESH_ELLIPTIC_LEX)
+			t=''
+			continue
+		elif(t == 'MESH_HYPERBOLIC'):
+			lexd.append(sv.MESH_HYPERBOLIC_LEX)
+			t=''
+			continue
+		elif(t == 'MESH_PARABOLIC'):
+			lexd.append(sv.MESH_PARABOLIC_LEX)
+			t=''
+			continue
+
+
+
+
 	#} end for loop over i  
 	return lexd
 #------------------------------------------------------------------------------ 
@@ -256,7 +305,8 @@ def tokenizerStdV1(data):
 #------------------------------------------------------------------------------
 def lexerStdV1(data):
 	print('STARTING LEXER')
-	d  = data.upper() # convert all text to upper case
-	lexd = tokenizerStdV1(d) # send all text for tokenizing
+	data_upper  = data.upper() # convert all text to upper case
+	lexd = tokenizerStdV1(data_upper,data) # send all text for tokenizing
+	#print(lexd)
 	return lexd
 #------------------------------------------------------------------------------

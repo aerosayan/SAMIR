@@ -95,6 +95,10 @@ def subdivide(xcoord,ycoord,subdivVec,interpVec):
 
 def findSpliceObjectPos(cmat,corder,lexd):
 # MARKER :: __findspliceobjectpos
+	
+	#print('cmat :',cmat)
+	#print('corder :',corder)
+
 	m = corder.__len__()
 	o = lexd.__len__()
 	i = 0
@@ -105,6 +109,7 @@ def findSpliceObjectPos(cmat,corder,lexd):
 		I = i
 		i = i+1
 		n = cmat[I].__len__()
+		j = 0
 		while j<n: # For each splice object index in cmat
 			J = j
 			j = j+1
@@ -127,6 +132,11 @@ def findSpliceObjectPos(cmat,corder,lexd):
 			#end while loop over k
 		#end while loop over j
 	#end while loop over i
+
+	for elem in spObjPos:
+		print('lexd[spObjPos] :',lexd[elem])
+	# end for loop
+
 	return spObjPos
 
 #------------------------------------------------------------------------------
@@ -151,24 +161,51 @@ def findSubdivVec(spObjPos,lexd):
 	interpVec = []
 	# What kind of mesh block is to be creatd for that interval
 	meshBlockVec = []
+	# Run loop over the number of splice objects to be collected
 	while i<m:
 		I = i
 		i = i+1
-		xi = spObjPos[I]
-		spObj = lexd[xi]
-		subdivPos = findNextLex(xi,sv.SUBDIV,lexd)
-
-		if(subdivPos > findNextLex(xi,sv.SCOLON,lexd)):
+		xi = spObjPos[I] # Positon of the splice object eg LINE,SPLINE
+		spObj = lexd[xi] # The splice object
+		subdivPos = findNextLex(xi,sv.SUBDIV,lexd) # Positon of next subdivision
+		scolonPos = findNextLex(xi,sv.SCOLON,lexd) # Position of next scolon
+		if(subdivPos > scolonPos):
 			#error 
+			print('ERR : subdivPos > scolonPos')
 			print('ERR : No suitable subdivision is found for spObjPos')
 			print(xi)
 			exit()
-		else:
+		else: # when valid subdiv position is found
 			subdivVec.append(lexd[subdivPos+2])
-			interpVec.append(sv.INTERP_LINEAR(lexdPos=subdivPos)) # TODO: Better way
+			# Find Interpolation Types after subdiv position
+			lerpPos = findNextLex(subdivPos,sv.LERP,lexd)
+			cerpPos = findNextLex(subdivPos,sv.CERP,lexd)
+			print ('lerpPos :',lerpPos)
+			print ('cerpPos :',cerpPos)
+			print ('scolonPos :',scolonPos)
+
+			if(lerpPos > 0 and cerpPos > 0): # The lerp and cerp both are found
+				if( lerpPos < scolonPos and cerpPos < scolonPos):
+					print('ERR : lerpPos and cerpPos < scolonPos')
+					print('ERR : both lerp and cerp can not be used at once')
+					exit()
+				#endif
+			else : # if not found then pass
+				pass
+			#endif
+			
+			# Handle only one kind of interpoaltion that is closest 
+			if(lerpPos >0 and lerpPos < scolonPos): # valid lerp command
+				interpVec.append(sv.INTERP_LINEAR(lexdPos=lerpPos))
+			elif(cerpPos >0 and cerpPos < scolonPos): # valid cerp command
+				interpVec.append(sv.INTERP_CUBIC(lexdPos=cerpPos))
+			#endif
+			
+			#interpVec.append(sv.INTERP_LINEAR(lexdPos=subdivPos)) # TODO: Better way
 			meshBlockVec.append(sv.MESH_LINEAR_UID) # For now TODO : better way
 		#endif
 	#end while
+	print('interpVec :',interpVec)
 	return subdivVec,interpVec,meshBlockVec
 
 #------------------------------------------------------------------------------
@@ -309,6 +346,7 @@ def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 
 #------------------------------------------------------------------------------
 # Find control node indices that will be then sorted and arranged 
+# TODO : mark_work implement spline interpolation by allowing splines to be registered
 def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 # MARKER :: __findcontrolnodeindices	
 	m = spObjPos.__len__()
@@ -396,6 +434,12 @@ def formWall(cmat,corder,corderpos,lexd):
 # MARKER :: __formwall
 	# Splice object positions
 	spObjPos = findSpliceObjectPos(cmat,corder,lexd)
+
+	#print('spObjPos :',spObjPos)
+	#for elem in spObjPos:
+	#	print('lexd[spObjPos] :',lexd[elem])
+	##end for loop
+
 	isPeriodic_BC = False # Is a periodic BC present ?
 
 	#print(lexd[spObjPos[0]]) # LINE or SPLINE etc
@@ -414,13 +458,19 @@ def formWall(cmat,corder,corderpos,lexd):
 	# Find subdivision vector,interpolation type and mesh block type
 	subdivVec,interpVec,meshBlockVec = findSubdivVec(spObjPos,lexd)
 
+	#mark_work
+
 	# Find and sort control node indices
+	# TODO : refactor for spline
 	sortedNodeIndices= findControlNodeIndices(spObjPos,isPeriodic_BC,lexd)
+
 
 	print('------------------------SORTED NODE VEC -------------------------')
 	print(sortedNodeIndices)
 	print('------------------------SUBDIVISION VEC -------------------------')
 	print(subdivVec)
+	print('----------------------INTERPOLATION VEC -------------------------')
+	print(interpVec)
 
 	# TODO : Generate wall as  2 numpy arrays and populate  them with x and y
 	# co-ordiantes respectively of the wall boundary
@@ -515,6 +565,10 @@ def collectSpliceObjectIndices(xi,collect,lexd):
 	points = []
 	# form ordered list of the tokens to collect from
 	collectOrder,collectOrderPos = makeLexCollectionOrder(xi,collect,lexd)
+	
+	#print('collectOrder :',collectOrder)
+	#print('collectOrderPos :',collectOrderPos)
+
 	m = collectOrder.__len__()
 	# matrix or 2d list used to store all the indices of collectOrder
 	collectionMatrix = [[]]
@@ -553,6 +607,8 @@ def collectSpliceObjectIndices(xi,collect,lexd):
 	#end while loop }
 	print('INF :: Finished collecting splice objects from splice')
 	collectionMatrix.pop() # remove the last empty row []
+	#print('collectionMatrix :',collectionMatrix)
+	#print('collectOrder :',collectOrder)
 	return collectionMatrix,collectOrder,collectOrderPos
 
 #------------------------------------------------------------------------------

@@ -13,12 +13,12 @@ import data_wall as daw
 from pylab import *
 
 
-data = fr.readFile('mesh.mir')
+splitData,joinedData = fr.readFile('mesh.mir')
 print('data saved')
 #print(data)
 
 
-lexd = lex.lexerStdV1(data)
+lexd = lex.lexerStdV1(joinedData)
 """
 for elem in lexd:
 	print(elem)

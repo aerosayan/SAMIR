@@ -18,6 +18,7 @@ END = lex(name='END',uid=1); arlex.append(END);
 POINT = lex(name='POINT',uid=100); arlex.append(POINT);
 LINE = lex(name='LINE',uid=101); arlex.append(LINE);
 SPLINE = lex(name='SPLINE',uid=102);arlex.append(SPLINE);
+FILE = lex(name='FILE',uid=103);arlex.append(FILE);
 
 NEW = lex(name='NEW',uid=200); arlex.append(NEW);
 FROM = lex(name='FROM',uid=201); arlex.append(FROM);
@@ -33,14 +34,12 @@ RCURL = lex(name='RCURL',uid=305);arlex.append(RCURL);
 LSQR = lex(name='LSQR',uid=306);arlex.append(LSQR);
 RSQR = lex(name='RSQR',uid=307);arlex.append(RSQR);
 
-
 SCOLON = lex(name='SEMICOLON',uid=400);arlex.append(SCOLON);
 COMMA = lex(name ='COMMA',uid=401);arlex.append(COMMA);
 DOT = lex(name='DOT',uid=402);arlex.append(DOT);
 ASSIGN = lex(name='ASSIGN',uid=403);arlex.append(ASSIGN);
 SUBDIV = lex(name='SUBDIV',uid=404);arlex.append(SUBDIV);
 JOIN = lex(name='JOIN',uid=405);arlex.append(JOIN);
-
 
 NORTH_WALL = lex(name='NORTH_WALL',uid=500);arlex.append(NORTH_WALL);
 SOUTH_WALL = lex(name='SOUTH_WALL',uid=501);arlex.append(SOUTH_WALL);
@@ -52,9 +51,15 @@ COLLECT = lex(name='COLLECT',uid=600);arlex.append(COLLECT);
 CAN_COLLECT = lex(name='CAN_COLLECT',uid=601);arlex.append(CAN_COLLECT);
 COLLECT_INDICES = lex(name='COLLECT_INDICES',uid=602);arlex.append(COLLECT_INDICES);
 
-LINTERP = lex(name='LINTERP',uid=700);arlex.append(LINTERP)
-CUBINTERP = lex(name='CUBINTERP',uid=701);arlex.append(CUBINTERP)
+# Interpolation types 
+LERP = lex(name='LERP',uid=700);arlex.append(LERP);
+CERP = lex(name='CERP',uid=701);arlex.append(CERP);
 
+# Mesh types
+MESH_LINEAR_LEX = lex(name='MESH_LINEAR_LEX',uid=800);arlex.append(MESH_LINEAR_LEX);
+MESH_ELLIPTIC_LEX = lex(name='MESH_ELLIPTIC_LEX',uid=801);arlex.append(MESH_ELLIPTIC_LEX);
+MESH_HYPERBOLIC_LEX = lex(name='MESH_HYPERBOLIC_LEX',uid=802);arlex.append(MESH_HYPERBOLIC_LEX);
+MESH_PARABOLIC_LEX = lex(name='MESH_PARABOLIC_LEX',uid=803);arlex.append(MESH_PARABOLIC_LEX);
 #------------------------------------------------------------------------------
 # Integer and double variables and constant 
 INT_CONST_UID = 5000
@@ -79,6 +84,14 @@ basic_INT_CONST = INT_CONST(constId='basicIntConst')
 basic_DBL_CONST = DBL_CONST(constId='basicDblConst')
 
 #------------------------------------------------------------------------------
+# Strings
+STRING_UID = 5100
+
+STRING = recordtype('STRING',[('constId','string'),('stringData',''),('uid',STRING_UID)])
+basic_STRING = STRING(constId='basicString')
+
+
+#------------------------------------------------------------------------------
 # Integration routines
 INTERP_LINEAR_UID = 6000 # Linear interpolation UID
 INTERP_CUBIC_UID = 6001 # Cubic interpolation UID
@@ -95,8 +108,8 @@ INTERP_CUBIC_UID = 6001 # Cubic interpolation UID
 # nodeDensity : the node density or no. of nodes in terms of percentage of total
 # 		numaber of nodes. Total sum = 100
 
-INTERP_LINEAR = recordtype('INTERP_LINEAR',[('nodePos',[]),('nodeDensity',[]),('lexdPos',-1)  ,('uid',INTERP_LINEAR_UID)])
-INTERP_CUBIC  = recordtype('INTERP_CUBIC' ,[('nodePos',[]),('nodeDensity',[]),('lexdPos',-1)  ,('uid',INTERP_CUBIC_UID) ])
+INTERP_LINEAR = recordtype('INTERP_LINEAR',[('totalNodes',0),('nodePos',[]),('nodeDensity',[]),('lexdPos',-1)  ,('uid',INTERP_LINEAR_UID)])
+INTERP_CUBIC  = recordtype('INTERP_CUBIC' ,[('totalNodes',0),('nodePos',[]),('nodeDensity',[]),('lexdPos',-1)  ,('uid',INTERP_CUBIC_UID) ])
 
 #------------------------------------------------------------------------------
 # Mesh block creation technique
@@ -104,6 +117,5 @@ MESH_LINEAR_UID = 6100
 MESH_ELLIPTIC_UID = 6101
 MESH_PARABOLIC_UID = 6102
 MESH_HYPERBOLIC_UID = 6103
-MESH_TRIANGLE_UID = 6104
 
 # TODO : Mesh block creation technique recordtypes
