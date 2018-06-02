@@ -1,33 +1,33 @@
 import samirStandardV1 as sv
 
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Delimiter string to be used for text processing
 DELSTR = ' ;,.()<>[]' # Every delimiter
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Collect double value from the text data stream
 # \param xi: the postion from which the collection is to begin
 # \param lhs,rhs : left and right hand side bounds respectively,
-#        within which the collection is to be done 
+#        within which the collection is to be done
 # \param data : The data from which the double is to be collected
 def collectDouble(xi,lhs,rhs,data):
 	dval = 0.0;
 	dval = float(data[xi-lhs+1:xi+rhs])
 	return dval
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Collect integer value from the text data stream
 # \param xi: the postion from which the collection is to begin
 # \param lhs,rhs : left and right hand side bounds respectively,
-#        within which the collection is to be done 
+#        within which the collection is to be done
 # \param data : The data from which the integer is to be collected
 def collectInteger(xi,lhs,rhs,data):
 	ival = 0;
 	ival = int(data[xi-lhs+1:xi+rhs])
 	return ival
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Find the position of the next delimeter from the current position
 # \param xi: The position from which the search is to begin
 # \param data: The data within which the search is to be done
@@ -37,8 +37,8 @@ def findNext(xi,data,delstr):
 	d = data[xi:] # Gather all data from the position xi to RHS
 	k = 0
 	deltry = [] # placeholder for find operation of delstr over d
-	delxi  = []  
-	for k in delstr: #{ 
+	delxi  = []
+	for k in delstr: #{
 		deltry.append(d.find(k))
 	#} end for loop over k in delstr
 	for k in deltry: #{
@@ -50,11 +50,11 @@ def findNext(xi,data,delstr):
 		nextPos = min(delxi)
 		return nextPos # found
 	else:
-		return -1 # not found  
+		return -1 # not found
 
 
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Find the position of the previous delimeter from the current position
 # \param xi: The position from which the search is to begin
 # \param data: The data within which the search is to be done
@@ -67,7 +67,7 @@ def findPrev(xi,data,delstr):
 	prevPos = findNext(0,d,delstr)
 	return prevPos
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Find the previous and the next delimeter position from the current position
 # \param xi: The position from which the search is to begin
 def findTokenBounds(xi,data):
@@ -75,7 +75,7 @@ def findTokenBounds(xi,data):
 	lhs = findPrev(xi,data,DELSTR)
 	return lhs,rhs
 
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 # Tokenize the data stream for further processing
 # \param data: The data of the  MIR file
 def tokenizerStdV1(data_upper,data_original):
@@ -85,13 +85,13 @@ def tokenizerStdV1(data_upper,data_original):
 	i = 0 # Iteration starts at zero
 	ni = 0 # next i
 	lexd = [] # Placeholder fot the lexeme form of the data
-	
+
 	isCollectingString = False
 
 	while i < n: #{
 		I = i
 		i = i+1 # Update iteration counter
-		c = data[I] # current letter 
+		c = data[I] # current letter
 		t = t + c # current token
 		if(c == ' '):
 			t=''
@@ -160,7 +160,7 @@ def tokenizerStdV1(data_upper,data_original):
 			elif(nextdel == nextdot): # It is double const
 				#print('Double encountered, dot at next del')
 				i = I+nextdot # set i so that the dot lexer will take care of it
-			elif(prevdel == prevdot): 
+			elif(prevdel == prevdot):
 				#print('Double encountered,dot at prev del') # So we skip to the next delimiter
 				i = I+nextdel
 			else:
@@ -298,9 +298,9 @@ def tokenizerStdV1(data_upper,data_original):
 
 
 
-	#} end for loop over i  
+	#} end for loop over i
 	return lexd
-#------------------------------------------------------------------------------ 
+#------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
 def lexerStdV1(data):
@@ -310,3 +310,5 @@ def lexerStdV1(data):
 	#print(lexd)
 	return lexd
 #------------------------------------------------------------------------------
+def test():
+	print("test successfull")
