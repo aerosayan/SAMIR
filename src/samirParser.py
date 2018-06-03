@@ -6,6 +6,7 @@ import data_wall as datWall
 # Parse the SAMIR language version 1 standard
 # \param lexData : the lexemes created in the lexer is used for easy parsing
 # \param echo [debug] : whether to print or not
+# \return errorcode of 1 or -1 for successfull and unsucessfull respectively
 def parserStdV1(lexData,echo=False):
 # MARKER :: __parserstdv1
 	lexd = lexData
@@ -37,7 +38,7 @@ def parserStdV1(lexData,echo=False):
 			collect = [sv.LINE,sv.SPLINE]
 			#print(cfg)
 
-			datWall.SOUTH_WALL_X,datWall.SOUTH_WALL_Y = verifyCFG(I,cfg,collect,lexd)
+			datWall.SOUTH_WALL_X,datWall.SOUTH_WALL_Y = verifyGrammar(I,cfg,collect,lexd)
 			print('SOUTH WALL CREATED')
 			SOUTH_WALL_PROCESSED = True
 		elif(c.uid == sv.NORTH_WALL.uid and SOUTH_WALL_PROCESSED == True and NORTH_WALL_PROCESSED == False):
@@ -51,7 +52,7 @@ def parserStdV1(lexData,echo=False):
 
 			collect = [sv.LINE,sv.SPLINE]
 
-			datWall.NORTH_WALL_X,datWall.NORTH_WALL_Y = verifyCFG(I,cfg,collect,lexd)
+			datWall.NORTH_WALL_X,datWall.NORTH_WALL_Y = verifyGrammar(I,cfg,collect,lexd)
 			print('NORTH WALL CREATED')
 			NORTH_WALL_PROCESSED = True
 		#endif
@@ -67,8 +68,10 @@ def parserStdV1(lexData,echo=False):
 #------------------------------------------------------------------------------
 # Find the next lex in the lex data stream
 # \param xi: Search start position
-# \param toFind: The lexem to be found
+# \param toFind: The lexem to be searched
 # \param lexd: Lex data stream
+# \return i : (>0) the position of the next lexeme that is searched
+# \return -1 : in case of lexeme not found
 def findNextLex(xi,toFind,lexd):
 # MARKER :: __findnextlex
 	n = lexd.__len__()
@@ -91,12 +94,14 @@ def findNextLex(xi,toFind,lexd):
 	if (found == False):
 		print('LEX NOT FOUND')
 		return -1
+
 #------------------------------------------------------------------------------
 # Subdivide the boundary nodes to form a wall using internal line subdivision
 # \param : xCoord :
 # \param : yCoord :
 # \param : subdivVec :
 # \param : interpVec :
+# \return : XWALL,YWALL : subdivided x & y co-ordinates of the wall
 def subdivide(xCoord,yCoord,subdivVec,interpVec):
 # MARKER :: __subdivide
 # TODO : handle all kinds of subdivision like linear and cubic spline interpolation
@@ -115,18 +120,16 @@ def subdivide(xCoord,yCoord,subdivVec,interpVec):
 		i = I # we access using this
 		I = i+1 # we iterate using this
 
-		x1 = xCoord[i]
-		x2 = xCoord[i+1]
-		y1 = yCoord[i]
-		y2 = yCoord[i+1]
+		x1 = float(xCoord[i])
+		x2 = float(xCoord[i+1])
+		y1 = float(yCoord[i])
+		y2 = float(yCoord[i+1])
 
-		k = subdivVec[i].constData
-		m0 = float(1.0/k)
-		n0 = float((k-1)/k)
+		k = subdivVec[i].constData # number of subdivisoin requested
 
 		# the ratios of the line division
-		m = 0
-		n = 0
+		m = 0.0
+		n = 0.0
 
 		# add the 1st control node x1 and y1
 		if(i == 0): # Prevents double insertion of x2 and y2 at every iteration
@@ -136,13 +139,13 @@ def subdivide(xCoord,yCoord,subdivVec,interpVec):
 
 		j = 0 # accessor
 		J = 0 # iterator
-		while J<k-1: # loop k-1 times to create k-1 new nodes
+		while J<k-1: # loop k-1 times to create k-1 new nodes # TODO :check it
 			j = J # we access using this
 			J = j+1 # we iteratre using this
 
-			m = m + m0
-			n = n + n0
-
+			m = m + float(1.0/float(k))
+			n = 1.0 - m
+			#print(m,n)
 			x = (m*x2 + n*x1)/(m+n)
 			y = (m*y2 + n*y1)/(m+n)
 
@@ -156,11 +159,13 @@ def subdivide(xCoord,yCoord,subdivVec,interpVec):
 
 	#end while loop over i
 	return np.array(XWALL),np.array(YWALL)
+
 #------------------------------------------------------------------------------
 # Find splice object position in lexd
 # \param cmat : collection matrix
 # \param corder : collection order used to collect cmat
 # \param lexd : lexeme data stream
+# \return spObjPos : splice objects positions
 def findSpliceObjectPos(cmat,corder,lexd):
 # MARKER :: __findspliceobjectpos
 
@@ -169,37 +174,39 @@ def findSpliceObjectPos(cmat,corder,lexd):
 
 	m = corder.__len__()
 	o = lexd.__len__()
-	i = 0
-	j = 0
 	spObjPos = [] # Position of the spObj in lexd for further use
 
-	while i<m: # For each splice object in corder
-		I = i
-		i = i+1
-		n = cmat[I].__len__()
-		j = 0
-		while j<n: # For each splice object index in cmat
-			J = j
-			j = j+1
-			indexObj = cmat[I][J]
-			k = 0
-			while k<o: # For each element in lexd see if the indices match and
+	i = 0 # accessor
+	I = 0 # iterator
+	while I<m: # For each splice object in corder
+		i = I # we access using this
+		I = i+1 # we iterate using this
+		n = cmat[i].__len__()
+		j = 0 # accessor
+		J = 0 # iterator
+		while J<n: # For each splice object index in cmat
+			j = J # we access using this
+			J = j+1 # we iterate using this
+			indexObj = cmat[i][j]
+			k = 0 # accessor
+			K = 0 # iterator
+			while K<o: # For each element in lexd see if the indices match and
 			# if they do match then store it in a list
-				K = k
-				k = k+1
-				if(K !=0):
-					if(lexd[K-1].uid != sv.SCOLON.uid):
+				k = K # we access using this
+				K = k+1 # we iterate using this
+				if(k !=0):
+					if(lexd[k-1].uid != sv.SCOLON.uid):
 						continue
 					#endif
 				#endif
-				if(lexd[K].uid == corder[I].uid):
-					if(lexd[K+2].constData == indexObj.constData):
-						spObjPos.append(K)
+				if(lexd[k].uid == corder[i].uid):
+					if(lexd[k+2].constData == indexObj.constData):
+						spObjPos.append(k)
 					#endif
 				#endif
-			#end while loop over k
-		#end while loop over j
-	#end while loop over i
+			#end while loop over K
+		#end while loop over J
+	#end while loop over I
 
 	for elem in spObjPos:
 		print('lexd[spObjPos] :',lexd[elem])
@@ -221,6 +228,9 @@ def findSpliceBounds():
 # Find subdivision vector from the lexeme data stream
 # \param spObjPos : special object position
 # \param lexd : lexeme data stream
+# \return subdivVec : how the subdivision should happen
+# \return interpVec : how the interpolation should happen
+# \return meshBlockVec : how the mesh block creation should happen
 def findSubdivVec(spObjPos,lexd):
 # MARKER :: __findsubdivvec
 	m = spObjPos.__len__()
@@ -291,7 +301,7 @@ def findSubdivVec(spObjPos,lexd):
 #
 # \param unsortedNodeVec : all the nodes collected in unsorted form
 # \param isPeriodic_BC : (bool) is the boundary condition periodic ?
-
+# \return sortedNodeVec : sorted node vector
 def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 # MARKER :: __sortnodevector
 	m = unsortedNodeVec.__len__()
@@ -427,10 +437,10 @@ def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 
 #------------------------------------------------------------------------------
 # Find control node indices that will be then sorted and arranged
-# TODO : mark_work implement spline interpolation by allowing splines to be registered
 # \param spObjPos :
 # \param isPeriodic_BC : (bool) is the boundary condition periodic?
 # \param lexd : lexeme data stream
+# \return sortedNodeVec : sorted node vector after calling the sorting algorithm
 def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 # MARKER :: __findcontrolnodeindices
 	m = spObjPos.__len__()
@@ -467,12 +477,12 @@ def findControlNodeIndices(spObjPos,isPeriodic_BC,lexd):
 
 	return sortedNodeVec
 
-
 #------------------------------------------------------------------------------
 # Find Control node co-ordinates
 # Find the co-oridnates of the nodes that make up the wall
 # \param sortedNodeIndices : sorted form of the node indices
 # \param lexd : lexeme data stream
+# \return x,y : control node co-ordinates
 def findControlNodeCoordinates(sortedNodeIndices,lexd):
 # MARKER :: __findcontrolnodecoordinates
 	m = sortedNodeIndices.__len__()
@@ -481,21 +491,22 @@ def findControlNodeCoordinates(sortedNodeIndices,lexd):
 	x = []
 	y = []
 
-	# TODO : swap the iterators and accessors
-	i = 1 # iterator
-	while i<m:
-		I = i # accessor
-		i = i+2
-		j = 0 # iterator
-		while j<n:
-			J = j # accessor
-			j = j+1
-			lex = lexd[J]
-			if(lex.uid == sortedNodeIndices[I-1].uid): # find the operator type
-				if(lexd[J-1].uid == sv.SCOLON.uid): # find only primary operators
-					if(lexd[J+2].constData == sortedNodeIndices[I].constData): # data check
-						scolonPos = findNextLex(J,sv.SCOLON,lexd)
-						nodePos = findNextLex(J+1,sortedNodeIndices[I-1],lexd)
+	i = 1 # accessor
+	I = 1 # iterator
+	while I<m:
+		i = I # we access using this
+		I = i+2 # we iterate using this
+		j = 0 # accessor
+		J = 0 # iterator
+		while J<n:
+			j = J # we access using this
+			J = j+1 # we iterate using this
+			lex = lexd[j]
+			if(lex.uid == sortedNodeIndices[i-1].uid): # find the operator type
+				if(lexd[j-1].uid == sv.SCOLON.uid): # find only primary operators
+					if(lexd[j+2].constData == sortedNodeIndices[i].constData): # data check
+						scolonPos = findNextLex(j,sv.SCOLON,lexd)
+						nodePos = findNextLex(j+1,sortedNodeIndices[i-1],lexd)
 						if(nodePos < scolonPos): # valid position check
 								x.append(float(lexd[nodePos+2].constData))
 								y.append(float(lexd[nodePos+4].constData))
@@ -506,8 +517,8 @@ def findControlNodeCoordinates(sortedNodeIndices,lexd):
 					#endif const data check
 				#endif primary operator check
 			#endif operator type check
-		#end while loop over j
-	#end while loop over i
+		#end while loop over J
+	#end while loop over I
 
 	#print('x :',x)
 	#print('y :',y)
@@ -520,6 +531,7 @@ def findControlNodeCoordinates(sortedNodeIndices,lexd):
 # \param corder :
 # \param corderpos :
 # \param lexd : lexeme date stream
+# \return xwall,ywall : x & y co-ordinates of the wall
 def formWall(cmat,corder,corderpos,lexd):
 # MARKER :: __formwall
 	# Splice object positions
@@ -574,10 +586,13 @@ def formWall(cmat,corder,corderpos,lexd):
 
 	return xwall,ywall
 
-
 #------------------------------------------------------------------------------
 # Prepare the splice objects
 # TODO : Documentation
+# \param xi : starting position of search
+# \param forLex :
+# \param lexd : lexeme data stream
+# \return spliceObjects : the splice objects that have been prepared
 def collectSpliceObjects(xi,forLex,lexd):
 # MARKER :: __collectspliceobjects
 	#cfg := [collectLex,sv.LSQR,sv.COLLECT_INDICES,sv.RSQR]
@@ -585,15 +600,16 @@ def collectSpliceObjects(xi,forLex,lexd):
 	end = findNextLex(xi,sv.RSQR,lexd)
 	#print('start : ',start,'| end : ',end)
 	spliceObjects = []
-	i = start
-	while i < end:
-		I = i
-		i = i+1
-		if(lexd[I].uid == sv.basic_INT_CONST.uid):
-			if (I == start):
-				spliceObjects[0] = lexd[I]
+	i = start # accessor
+	I = start # iterator
+	while I < end: # iterate using I
+		i = I # we access using this
+		I = i+1 # we iterate using this
+		if(lexd[i].uid == sv.basic_INT_CONST.uid):
+			if (i == start):
+				spliceObjects[0] = lexd[i]
 			else:
-				spliceObjects.append(lexd[I])
+				spliceObjects.append(lexd[i])
 			#endif
 		#endif
 	#end while loop
@@ -607,12 +623,12 @@ def collectSpliceObjects(xi,forLex,lexd):
 # \param xi: Start position
 # \param collect: The lex which are allowed to be collected
 # \param lexd: The lex data stream
+# \return collectOrder : which lexemes to collect?
+# \retrun collectOrderPos : where is the positon of the lexemes to collect?
 def makeLexCollectionOrder(xi,collect,lexd):
 # MARKER :: __makecollectionorder
 	n = lexd.__len__()
 	m = collect.__len__()
-	i = xi
-	j = 0
 	collectOrder = []
 	collectOrderPos = []
 	endLine = findNextLex(xi,sv.SCOLON,lexd)
@@ -622,13 +638,15 @@ def makeLexCollectionOrder(xi,collect,lexd):
 	print('Current position : ',xi)
 	print('Next RCURL position : ',endCollect)
 
-	while i<endCollect:
-		I = i
-		i = i+1
+	i = xi # accessor
+	I = xi # iterator
+	while I<endCollect:
+		i = I # access using this
+		I = i+1 # iterate using this
 		for k in collect:
-			if(k.uid == lexd[I].uid):
+			if(k.uid == lexd[i].uid):
 				collectOrder.append(k)
-				collectOrderPos.append(I)
+				collectOrderPos.append(i)
 				continue
 			#endif
 		# end for loop
@@ -646,6 +664,12 @@ def makeLexCollectionOrder(xi,collect,lexd):
 #------------------------------------------------------------------------------
 # Collect the indices of all the objects that make up the splice
 # i.e collect indices of LINE,SPLINE,etc from the splice collection region.
+# \param xi :
+# \param collect :
+# \param lexd :
+# \return collectionMatrix : the collection matrix
+# \return collectOrder : the order of collection for the collection matrix
+# \return collectOrderPos : the position of the lexemes ordered in collectOrder
 def collectSpliceObjectIndices(xi,collect,lexd):
 # MARKER :: __collectspliceobjectindices
 	n = lexd.__len__()
@@ -701,13 +725,17 @@ def collectSpliceObjectIndices(xi,collect,lexd):
 	return collectionMatrix,collectOrder,collectOrderPos
 
 #------------------------------------------------------------------------------
-# Verify the pseudo Context Free Grammar ???? is it CFG???
-# and collect the data
-def verifyCFG(xi,cfg,collect,lexd):
-# MARKER :: __verifycfg
+# Verify the language grammar and collect the data
+# \param xi : the postion from which it is called
+# \param cfg : the grammar to be checked
+# \param collect : what to collect
+# \param lexd : lexeme data stream
+# \return xwall,ywall : after verifying everything, create and return the walls
+def verifyGrammar(xi,cfg,collect,lexd):
+# MARKER :: __verifygrammar
 	n = lexd.__len__()
 	i = xi # lexd iterator index # The position of SOUTH_WALL
-	j=0 # cgf iterator index
+	j=0 # cfg iterator index
 	xwall = []
 	ywall = []
 	while i<n: #{

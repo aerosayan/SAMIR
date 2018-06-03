@@ -29,8 +29,13 @@ swy = daw.SOUTH_WALL_Y
 nwx = daw.NORTH_WALL_X
 nwy = daw.NORTH_WALL_Y
 
-
+print(nwy)
 # Plot the sw and nw
-plot(swx,swy)
-plot(nwx,nwy)
+plot(nwy,'go')
+plot(swy,'ro')
+show()
+
+figure()
+plot(swx,swy,'r.')
+plot(nwx,nwy,'b.')
 show()

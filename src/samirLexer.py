@@ -3,7 +3,7 @@ import samirStandardV1 as sv
 
 #------------------------------------------------------------------------------
 # Delimiter string to be used for text processing
-DELSTR = ' ;,.()<>[]' # Every delimiter
+DELSTR = ' ;,.()<>[]' # Every delimiter that will be needed to be checked
 
 #------------------------------------------------------------------------------
 # Collect double value from the text data stream
@@ -11,6 +11,7 @@ DELSTR = ' ;,.()<>[]' # Every delimiter
 # \param lhs,rhs : left and right hand side bounds respectively,
 #        within which the collection is to be done
 # \param data : The data from which the double is to be collected
+# \return dval : double value collected from the text data stream
 def collectDouble(xi,lhs,rhs,data):
 	dval = 0.0;
 	dval = float(data[xi-lhs+1:xi+rhs])
@@ -22,6 +23,7 @@ def collectDouble(xi,lhs,rhs,data):
 # \param lhs,rhs : left and right hand side bounds respectively,
 #        within which the collection is to be done
 # \param data : The data from which the integer is to be collected
+# \return ival : integer value collected from the text data stream
 def collectInteger(xi,lhs,rhs,data):
 	ival = 0;
 	ival = int(data[xi-lhs+1:xi+rhs])
@@ -33,6 +35,8 @@ def collectInteger(xi,lhs,rhs,data):
 # \param data: The data within which the search is to be done
 # \param delstr: The string containing all the delimeters for which the search
 #        is to be performed
+# \return  nextPos : the postion of the next delimiter
+# \return -1 : if next delimiter searched is  not found
 def findNext(xi,data,delstr):
 	d = data[xi:] # Gather all data from the position xi to RHS
 	k = 0
@@ -52,14 +56,13 @@ def findNext(xi,data,delstr):
 	else:
 		return -1 # not found
 
-
-
 #------------------------------------------------------------------------------
 # Find the position of the previous delimeter from the current position
 # \param xi: The position from which the search is to begin
 # \param data: The data within which the search is to be done
 # \param delstr: The string containing all the delimeters for which the search
 #        is to be performed
+# \return prevPos : postion of the previous delimiter
 def findPrev(xi,data,delstr):
 	d = data[:xi+1] # Gather all data from the position xi to LHS [:xi+1] is
 	# used because python removes one letter forcibly during back splicing
@@ -70,6 +73,7 @@ def findPrev(xi,data,delstr):
 #------------------------------------------------------------------------------
 # Find the previous and the next delimeter position from the current position
 # \param xi: The position from which the search is to begin
+# \return lhs,rhs : the left and right bounds of the token
 def findTokenBounds(xi,data):
 	rhs = findNext(xi,data,DELSTR)
 	lhs = findPrev(xi,data,DELSTR)
@@ -78,6 +82,7 @@ def findTokenBounds(xi,data):
 #------------------------------------------------------------------------------
 # Tokenize the data stream for further processing
 # \param data: The data of the  MIR file
+# \return lexd : The lexeme data stream
 def tokenizerStdV1(data_upper,data_original):
 	data = data_upper
 	n = data.__len__()
@@ -295,14 +300,16 @@ def tokenizerStdV1(data_upper,data_original):
 			t=''
 			continue
 
-
-
-
 	#} end for loop over i
+
 	return lexd
+
 #------------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------
+# Run the lexer for the standard version 1 of SAMIR
+# \param data : text data collected from MIR file in an ASCII format
+# \return lexd : lexeme data stream that is needed by the parser
 def lexerStdV1(data):
 	print('STARTING LEXER')
 	data_upper  = data.upper() # convert all text to upper case
@@ -310,5 +317,3 @@ def lexerStdV1(data):
 	#print(lexd)
 	return lexd
 #------------------------------------------------------------------------------
-def test():
-	print("test successfull")

@@ -8,18 +8,18 @@ Point[4] = new Point(1.5,0.5);
 Point[6] = new Point(5.0,1.5);
 
 
-Line[1] = from Point(1,2)<<subdiv(4)>> ;
-Line[3] = from Point(2,5)<<subdiv(4) >> ;
+Line[1] = from Point(1,2)<<subdiv(40)>> ;
+Line[3] = from Point(2,5)<<subdiv(80) >> ;
 
-Line[2] = from Point(3,4)<<subdiv(4)>>;
-Line[4] = from Point(4,6)<<subdiv(4)>>;
+Line[2] = from Point(3,4)<<subdiv(40)>>;
+Line[4] = from Point(4,6)<<subdiv(80)>>;
 
-File[1] = new File("cd_nozzle_wall_coord.dat");
-File[2] = new File("naca2412.dat");
+//File[1] = new File("cd_nozzle_wall_coord.dat");
+//File[2] = new File("naca2412.dat");
 
-Spline[1] = new Spline(from Point[7] to Point[8] ,by{File[1]})<<subdiv(100),cerp,mesh_elliptic>>;
+//Spline[1] = new Spline(from Point[7] to Point[8] ,by{File[1]})<<subdiv(100),lerp,mesh_linear>>;
 
-south_wall = new splice(from Point[1] to Point[5], by{Line[1,3],Spline[1]} );
+south_wall = new splice(from Point[1] to Point[5], by{Line[1,3]} );
 north_wall = new splice(from Point[3] to Point[6], by{Line[2,4]} );
 
 END;
