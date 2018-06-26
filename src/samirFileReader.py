@@ -13,6 +13,8 @@ def readFile(filePath,uncomment = True,echo = False):
 
 	i = 0
 	temp = []
+	isCommentActive = True
+	singleLineCommentStartPos = 0
 	splitData = []
 	joinedData = []
 
@@ -24,15 +26,19 @@ def readFile(filePath,uncomment = True,echo = False):
 			temp.append(c)
 			splitData.append(temp)
 			temp = []
+			continue
 		elif(c == '/' and data[I+1] == '/' and uncomment == True): # single line comment encountered
-			splitData.append(temp)
+			temp.append(c)
+			singleLineCommentStartPos = I # the position at which // is found
+			i = data.find('\n',singleLineCommentStartPos) # jump to next '\n'
+			continue
+		elif(c=='\n'):# skip new line characters
 			temp = []
-		elif(c == '\n'): # skip new line characters
-			#temp.append(c)
 			pass
 		else: # just continue adding stuff
 			temp.append(c)
-
+		#end if
+	#end while loop
 	# Join data to form legible words
 	joinedData = "".join("".join(e) for e in splitData)
 	#end while loop over i

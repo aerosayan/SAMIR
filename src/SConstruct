@@ -1,0 +1,4 @@
+import os
+path = ['C:\\msys64\\usr\\bin']
+env = Environment(tools=['mingw'], ENV = {'PATH' : path})
+env.Program(['main.cpp','Node.cpp','GridGenerator.cpp'],LINKFLAGS=['-static'])

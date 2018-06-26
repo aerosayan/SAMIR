@@ -13,7 +13,7 @@ Line[3] = from Point(2,5)<<subdiv(80) >> ;
 
 Line[2] = from Point(3,4)<<subdiv(40)>>;
 Line[4] = from Point(4,6)<<subdiv(80)>>;
-
+BAD DOG// hello kitty
 //File[1] = new File("cd_nozzle_wall_coord.dat");
 //File[2] = new File("naca2412.dat");
 

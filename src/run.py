@@ -16,11 +16,6 @@ print(joinedData)
 
 lexd = lex.lexerStdV1(joinedData)
 
-"""
-for elem in lexd:
-	print(elem)
-"""
-
 err = par.parserStdV1(lexd,echo=True)
 
 swx = daw.SOUTH_WALL_X
@@ -30,12 +25,21 @@ nwx = daw.NORTH_WALL_X
 nwy = daw.NORTH_WALL_Y
 
 print(nwy)
+"""
 # Plot the sw and nw
 plot(nwy,'go')
 plot(swy,'ro')
 show()
-
+"""
 figure()
 plot(swx,swy,'r.')
 plot(nwx,nwy,'b.')
 show()
+
+zip(nwx,nwy,swx,swy)
+
+import csv
+
+with open("walls.dat","w") as f:
+	writer = csv.writer(f,delimiter='\t')
+	writer.writerows(zip(nwx,nwy,swx,swy))
