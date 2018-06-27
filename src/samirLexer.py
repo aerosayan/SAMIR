@@ -255,19 +255,19 @@ def tokenizerStdV1(data_upper,data_original):
 			lexd.append(sv.JOIN)
 			t=''
 			continue
-		elif(t == 'NORTH_WALL'):
+		elif(t == 'NORTHWALL'):
 			lexd.append(sv.NORTH_WALL)
 			t=''
 			continue
-		elif(t == 'SOUTH_WALL'):
+		elif(t == 'SOUTHWALL'):
 			lexd.append(sv.SOUTH_WALL)
 			t=''
 			continue
-		elif(t == 'EAST_WALL'):
+		elif(t == 'EASTWALL'):
 			lexd.append(sv.EAST_WALL)
 			t=''
 			continue
-		elif(t == 'WEST_WALL'):
+		elif(t == 'WESTWALL'):
 			lexd.append(sv.WEST_WALL)
 			t=''
 			continue

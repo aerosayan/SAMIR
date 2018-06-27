@@ -14,14 +14,19 @@ public:
 	// GETTERS
 	//-----------------------------
 	std::vector<std::vector<Node *> >& getGrid(){return m_grid;}
+
 	//-----------------------------
 	// FUNCTION DECLARATIONS
 	//-----------------------------
 	// Generate structured grid for the given NEWS walls
-	std::vector<std::vector<Node *> >& genGrid();
+	std::vector<std::vector<Node *> >& genGrid(double * _nwx,
+	    double * _nwy, double * _swx, double* _swy,
+		unsigned int _imax,unsigned int _jmax);
+
 	// Print grid to file so that we can use it externally
 	// @param string: name of the ascii file to which the data is printed
 	void printGridToFile(std::string);
+
 private:
 	//-----------------------------
 	// DATA MEMBERS
@@ -41,12 +46,13 @@ private:
 	// @return : the subdivided vector from according to the specs of the user
 	std::vector<Node *> subdivide(Node*,Node*,unsigned int);
 
+	// Run a null pointer check to ensure our grid is full
+	void nullCheck(std::vector<std::vector<Node *> >& );
+
 	// Generate a uniform clustered grid
 	// @param vec<vec<Node*> >: the computational grid sent by reference
 	void genUniformCluster(std::vector<std::vector<Node *> >& );
 
-	// Run a null pointer check to ensure our grid is full
-	void nullptrCheck(std::vector<std::vector<Node *> >& );
 };
 
 #endif

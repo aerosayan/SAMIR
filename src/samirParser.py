@@ -32,8 +32,8 @@ def parserStdV1(lexData,echo=False):
 			print('PROCESSING SOUTH_WALL ')
 			cfg = [sv.SOUTH_WALL,sv.ASSIGN,sv.NEW,sv.SPLICE,sv.LPAREN,sv.FROM,
 			sv.POINT,sv.LSQR,sv.basic_INT_CONST,sv.RSQR,sv.TO,sv.POINT,sv.LSQR,
-			sv.basic_INT_CONST,sv.RSQR,sv.COMMA,sv.BY,sv.LCURL,sv.COLLECT,sv.RCURL,
-			sv.RPAREN,sv.SCOLON]
+			sv.basic_INT_CONST,sv.RSQR,sv.COMMA,sv.BY,sv.LCURL,sv.COLLECT,
+			sv.RCURL, sv.RPAREN,sv.SCOLON]
 
 			collect = [sv.LINE,sv.SPLINE]
 			#print(cfg)
@@ -47,8 +47,8 @@ def parserStdV1(lexData,echo=False):
 
 			cfg = [sv.NORTH_WALL,sv.ASSIGN,sv.NEW,sv.SPLICE,sv.LPAREN,sv.FROM,
 			sv.POINT,sv.LSQR, sv.basic_INT_CONST,sv.RSQR,sv.TO,sv.POINT,sv.LSQR,
-			sv.basic_INT_CONST,sv.RSQR,sv.COMMA,sv.BY,sv.LCURL,sv.COLLECT,sv.RCURL,
-			sv.RPAREN,sv.SCOLON]
+			sv.basic_INT_CONST,sv.RSQR,sv.COMMA,sv.BY,sv.LCURL,sv.COLLECT,
+			sv.RCURL, sv.RPAREN,sv.SCOLON]
 
 			collect = [sv.LINE,sv.SPLINE]
 

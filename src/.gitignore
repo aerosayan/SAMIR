@@ -1,5 +1,10 @@
+.sconsign.dblite
 *.swp
 *.dat
 *.pyc
+*.pyd
+build/*
+samir.c
 *.o
+*.exe
 a
