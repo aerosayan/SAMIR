@@ -8,12 +8,9 @@
 #endif
 
 
-EXTERNC void runGridGenerator(double* _nwallx,
-	double* _nwally,
-	double* _swallx,
-	double* _swally,
-	unsigned int _imax,
-	unsigned int _jmax,
+EXTERNC void runGridGenerator(double* _nwallx, double* _nwally,
+	double* _swallx, double* _swally,
+	unsigned int _imax, unsigned int _jmax,
 	char* _outputFile);
 
 

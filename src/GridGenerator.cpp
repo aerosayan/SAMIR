@@ -4,25 +4,12 @@
 #include <fstream>
 #include <iomanip>
 
-std::vector<std::vector<Node *> >& GridGenerator::genGrid(double * _nwx,
-	double * _nwy, double * _swx, double* _swy,
-	unsigned int _imax,unsigned int _jmax)
-// MARKER :: __gengrid
-{
-	/*
-	// Read in file and create the boundaries
-	// TODO : Direct connection with python
-	std::ifstream file;
-	file.open("walls.dat");
-	double xswall,yswall,xnwall,ynwall;
 
-	while(file) {
-		file >> xswall >>  yswall >> xnwall >> ynwall;
-		m_swall.push_back(new Node(xswall,yswall));
-		m_nwall.push_back(new Node(xnwall,ynwall));
-	}
-	file.close();
-	*/
+void GridGenerator::genWalls(double * _nwx, double * _nwy,
+	double * _swx, double* _swy,
+	unsigned int _imax,unsigned int _jmax)
+// MARKER :: __genwalls
+{
 	// Create iterators
 	unsigned int i=0;
 	unsigned int j=0;
@@ -40,49 +27,73 @@ std::vector<std::vector<Node *> >& GridGenerator::genGrid(double * _nwx,
 	//m_wwall.push_back(new Node(m_nwall.at(0)))
 
 	m_ewall = subdivide(m_swall.at(m_swall.size()-1),
-	                    m_nwall.at(m_nwall.size()-1),_jmax);
+	    m_nwall.at(m_nwall.size()-1),_jmax);
 
 	if(m_swall.size() != m_nwall.size() || m_swall.size() == 0
-	                                    || m_nwall.size() == 0) {
+	    || m_nwall.size() == 0) {
 		std::cout<<"ERR : FATAL : north and south wall size error..."
-				 <<std::endl;
+			 <<std::endl;
 		// TODO : runtime execution stop
 	}
 
 	if(m_ewall.size() != m_wwall.size() || m_ewall.size() == 0
-	                                    || m_wwall.size() == 0) {
+	        || m_wwall.size() == 0) {
 		std::cout<<"ERR : FATAL : east and west wall sizes error ..."
-		         <<std::endl;
+		    <<std::endl;
 		// TODO : runtime execution stop
 	}
 
-	unsigned int n = m_swall.size();
-	unsigned int m = m_ewall.size();
 
-	std::cout<<"INF:: n : "<<n<<std::endl;
-	std::cout<<"INF:: m : "<<m<<std::endl;
+}
 
-	// Initialize the grid to required size and all the elements to NULL
-	std::vector<std::vector<Node *> > m_grid(m,std::vector<Node *>(n,NULL));
-	// Set the boundaries
-	// First row shall be south wall
-	for(i=0;i<n;i++) {
-		m_grid.at(0).at(i) = m_swall.at(i);
+void GridGenerator::genWalls(std::string _filename)
+// MARKER :: __genwalls
+{
+	unsigned int _jmax = 69;
+	// Read in file and create the boundaries
+	// TODO : Direct connection with python
+	std::ifstream file;
+	file.open(_filename.c_str());
+	double xswall,yswall,xnwall,ynwall;
+
+	while(file) {
+		file >> xswall >>  yswall >> xnwall >> ynwall;
+		m_swall.push_back(new Node(xswall,yswall));
+		m_nwall.push_back(new Node(xnwall,ynwall));
 	}
-	// Last row shall be north wall
-	for(i=0;i<n;i++) {
-		m_grid.at(m-1).at(i) = m_nwall.at(i);
-	}
-	// First column shall be west wall
-	for(j=0;j<m;j++) {
-		m_grid.at(j).at(0) = m_wwall.at(j);
-	}
-	// Last column shall be east wall
-	for(j=0;j<m;j++) {
-		m_grid.at(j).at(n-1) = m_ewall.at(j);
+	file.close();
+
+	//TODO : The end points are missing so make a new subdivide func
+	// to take in the wall vector and push back the newly created nodes
+	//m_wwall.push_back(new Node(m_swall.at(0)))
+	m_wwall = subdivide(m_swall.at(0),m_nwall.at(0),_jmax);
+	//m_wwall.push_back(new Node(m_nwall.at(0)))
+
+	m_ewall = subdivide(m_swall.at(m_swall.size()-1),
+	    m_nwall.at(m_nwall.size()-1),_jmax);
+
+	if(m_swall.size() != m_nwall.size() || m_swall.size() == 0
+	    || m_nwall.size() == 0) {
+		std::cout<<"ERR : FATAL : north and south wall size error..."
+			 <<std::endl;
+		// TODO : runtime execution stop
 	}
 
-	std::cout<<m_grid.size()<<std::endl;
+	if(m_ewall.size() != m_wwall.size() || m_ewall.size() == 0
+	        || m_wwall.size() == 0) {
+		std::cout<<"ERR : FATAL : east and west wall sizes error ..."
+		    <<std::endl;
+		// TODO : runtime execution stop
+	}
+
+
+}
+
+std::vector<std::vector<Node *> >& GridGenerator::genGrid()
+// MARKER :: __gengrid
+{
+	// Initialize grid
+	initGrid();
 	// Create a uniform cluster for now
 	genUniformCluster(m_grid);
 	// Run a null pointer check to ensure the mesh is full
@@ -108,6 +119,39 @@ void GridGenerator::printGridToFile(std::string _file)
 	meshFile.close();
 }
 
+void GridGenerator::initGrid()
+{
+	// Create iterators
+	unsigned int i=0;
+	unsigned int j=0;
+
+	// Create grid size variables
+	unsigned int n = m_swall.size();
+	unsigned int m = m_ewall.size();
+
+	std::cout<<"INF:: n : "<<n<<std::endl;
+	std::cout<<"INF:: m : "<<m<<std::endl;
+
+	// Initialize the grid to required size and all the elements to NULL
+	m_grid = std::vector<std::vector<Node *> >(m,std::vector<Node *>(n,NULL));
+	// Set the boundaries
+	// First row shall be south wall
+	for(i=0;i<n;i++) {
+		m_grid.at(0).at(i) = m_swall.at(i);
+	}
+	// Last row shall be north wall
+	for(i=0;i<n;i++) {
+		m_grid.at(m-1).at(i) = m_nwall.at(i);
+	}
+	// First column shall be west wall
+	for(j=0;j<m;j++) {
+		m_grid.at(j).at(0) = m_wwall.at(j);
+	}
+	// Last column shall be east wall
+	for(j=0;j<m;j++) {
+		m_grid.at(j).at(n-1) = m_ewall.at(j);
+	}
+}
 std::vector<Node*> GridGenerator::subdivide(Node* _n1, Node* _n2,
 	unsigned int _subdivLevel)
 // MARKER :: __subdivide

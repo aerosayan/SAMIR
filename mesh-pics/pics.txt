@@ -1,0 +1,3 @@
+mesh1 = supersonic aerofoil
+mesh2 = convergent divergent rocket exhaust nozzle
+scheme = the full samir scheme

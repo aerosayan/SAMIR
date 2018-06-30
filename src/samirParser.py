@@ -29,7 +29,7 @@ def parserStdV1(lexData,echo=False):
 		i = i+1
 		if(c.uid == sv.SOUTH_WALL.uid and SOUTH_WALL_PROCESSED == False):
 		# First process the SOUTH_WALL
-			print('PROCESSING SOUTH_WALL ')
+			print('INF : processing south wall...')
 			cfg = [sv.SOUTH_WALL,sv.ASSIGN,sv.NEW,sv.SPLICE,sv.LPAREN,sv.FROM,
 			sv.POINT,sv.LSQR,sv.basic_INT_CONST,sv.RSQR,sv.TO,sv.POINT,sv.LSQR,
 			sv.basic_INT_CONST,sv.RSQR,sv.COMMA,sv.BY,sv.LCURL,sv.COLLECT,
@@ -39,11 +39,11 @@ def parserStdV1(lexData,echo=False):
 			#print(cfg)
 
 			datWall.SOUTH_WALL_X,datWall.SOUTH_WALL_Y = verifyGrammar(I,cfg,collect,lexd)
-			print('SOUTH WALL CREATED')
+			print('INF : south wall created...')
 			SOUTH_WALL_PROCESSED = True
 		elif(c.uid == sv.NORTH_WALL.uid and SOUTH_WALL_PROCESSED == True and NORTH_WALL_PROCESSED == False):
 		# Second process the NORTH_WALL
-			print('PROCESSING NORTH_WALL ')
+			print('INF : processing north wall...')
 
 			cfg = [sv.NORTH_WALL,sv.ASSIGN,sv.NEW,sv.SPLICE,sv.LPAREN,sv.FROM,
 			sv.POINT,sv.LSQR, sv.basic_INT_CONST,sv.RSQR,sv.TO,sv.POINT,sv.LSQR,
@@ -53,7 +53,7 @@ def parserStdV1(lexData,echo=False):
 			collect = [sv.LINE,sv.SPLINE]
 
 			datWall.NORTH_WALL_X,datWall.NORTH_WALL_Y = verifyGrammar(I,cfg,collect,lexd)
-			print('NORTH WALL CREATED')
+			print('INF : north wall created...')
 			NORTH_WALL_PROCESSED = True
 		#endif
 
@@ -92,7 +92,7 @@ def findNextLex(xi,toFind,lexd):
 
 	# If lex is not found then return error
 	if (found == False):
-		print('LEX NOT FOUND')
+		print('INF : lex not found...')
 		return -1
 
 #------------------------------------------------------------------------------
@@ -209,7 +209,7 @@ def findSpliceObjectPos(cmat,corder,lexd):
 	#end while loop over I
 
 	for elem in spObjPos:
-		print('lexd[spObjPos] :',lexd[elem])
+		print('INF : lexd[spObjPos] :',lexd[elem])
 	# end for loop
 
 	return spObjPos
@@ -262,9 +262,9 @@ def findSubdivVec(spObjPos,lexd):
 			# Find Interpolation Types after subdiv position
 			lerpPos = findNextLex(subdivPos,sv.LERP,lexd)
 			cerpPos = findNextLex(subdivPos,sv.CERP,lexd)
-			print ('lerpPos :',lerpPos)
-			print ('cerpPos :',cerpPos)
-			print ('scolonPos :',scolonPos)
+			print ('INF : lerpPos :',lerpPos)
+			print ('INF : cerpPos :',cerpPos)
+			print ('INF : scolonPos :',scolonPos)
 
 			if(lerpPos > 0 and cerpPos > 0): # The lerp and cerp both are found
 				if( lerpPos < scolonPos and cerpPos < scolonPos):
@@ -318,13 +318,13 @@ def sortNodeVector(unsortedNodeVec,isPeriodic_BC):
 	if(m%8 ==4 and isPeriodic_BC):
 		pass # Periodic
 	elif(m%8 ==0 and ~isPeriodic_BC):
-		print('m :',m)
+		print('INF :m :',m)
 		pass # Non-periodic
 	else:
 		#TODO : Possible source of error while using periodic bc . Fix it later
 		#TODO : Unit test this and make sure it works
 		print('ERR : m%8 = 0 and isPeriodic_BC = True : are contradictory')
-		print('m :',m)
+		print('INF :m :',m)
 		exit()
 
 	# Sorting loop
@@ -549,10 +549,10 @@ def formWall(cmat,corder,corderpos,lexd):
 
 	if(lexd[spObjPos[0]].uid == lexd[spObjPos[-1]].uid):
 		if(lexd[spObjPos[0]+2].constData == lexd[spObjPos[-1]+2].constData):
-			print('PERIODIC BC')
+			print('INF : periodic boundary condition encountered...')
 			isPeriodic_BC = True
 		else:
-			print('NON-PERIODIC BC')
+			print('INF : non-periodic boundary conditon encountered...')
 			isPeriodic_BC = False
 		#endif
 	#endif
@@ -566,20 +566,20 @@ def formWall(cmat,corder,corderpos,lexd):
 	sortedNodeIndices= findControlNodeIndices(spObjPos,isPeriodic_BC,lexd)
 
 
-	print('------------------------SORTED NODE VEC -------------------------')
-	print(sortedNodeIndices)
-	print('------------------------SUBDIVISION VEC -------------------------')
-	print(subdivVec)
-	print('----------------------INTERPOLATION VEC -------------------------')
-	print(interpVec)
+	#print('------------------------SORTED NODE VEC -------------------------')
+	#print(sortedNodeIndices)
+	#print('------------------------SUBDIVISION VEC -------------------------')
+	#print(subdivVec)
+	#print('----------------------INTERPOLATION VEC -------------------------')
+	#print(interpVec)
 
 	# TODO : Generate wall as  2 numpy arrays and populate  them with x and y
 	# co-ordiantes respectively of the wall boundary
 	xcoord,ycoord = findControlNodeCoordinates(sortedNodeIndices,lexd)
 
-	print('-------------------CONTROL NODE CO-ORDINATES --------------------')
-	print('x :',xcoord)
-	print('y :',ycoord)
+	#print('-------------------CONTROL NODE CO-ORDINATES --------------------')
+	#print('x :',xcoord)
+	#print('y :',ycoord)
 
 	# TODO : subdivide subroutine possibly using numpy or C++
 	xwall,ywall = subdivide(xcoord,ycoord,subdivVec,interpVec)
@@ -613,8 +613,8 @@ def collectSpliceObjects(xi,forLex,lexd):
 			#endif
 		#endif
 	#end while loop
-	print('spliceObjects : ',spliceObjects)
-	print('spliceObjects have been prepared')
+	print('INF : spliceObjects : ',spliceObjects)
+	print('INF : spliceObjects have been prepared...')
 	return spliceObjects
 
 #------------------------------------------------------------------------------
@@ -632,11 +632,11 @@ def makeLexCollectionOrder(xi,collect,lexd):
 	collectOrder = []
 	collectOrderPos = []
 	endLine = findNextLex(xi,sv.SCOLON,lexd)
-	print('Current position : ',xi)
-	print('Next SCOLON position : ',endLine)
+	print('INF : current position : ',xi)
+	print('INF : next SCOLON position : ',endLine)
 	endCollect = findNextLex(xi,sv.RCURL,lexd)
-	print('Current position : ',xi)
-	print('Next RCURL position : ',endCollect)
+	print('INF : current position : ',xi)
+	print('INF : next RCURL position : ',endCollect)
 
 	i = xi # accessor
 	I = xi # iterator
@@ -651,10 +651,10 @@ def makeLexCollectionOrder(xi,collect,lexd):
 			#endif
 		# end for loop
 	#end while loop
-	print('collect : ', collect)
-	print('collectOrder : ',collectOrder)
-	print('collectOrderPos : ',collectOrderPos)
-	print('collection order prepared')
+	print('DBG : collect : ', collect)
+	print('DBG : collectOrder : ',collectOrder)
+	print('DBG : collectOrderPos : ',collectOrderPos)
+	print('INF : collection order prepared...')
 	if (collectOrder.__len__() != collectOrderPos.__len__()):
 		print('ERR : collectOrder and collectOrderPos length mismatch')
 		exit()
@@ -697,28 +697,28 @@ def collectSpliceObjectIndices(xi,collect,lexd):
 		j = j+1 # update collect iterator
 		c = collectOrder[J]
 		if(c.uid == sv.POINT.uid):
-			print('INF :: Collecting POINT')
-			print('exit mark4')
+			print('INF : collecting POINT')
+			print('ERR : POINT cannot be directly collected...exiting...')
 			exit()
 		elif(c.uid == sv.LINE.uid):
-			print('INF :: Collecting LINE')
+			print('INF : collecting LINE')
 			collectionMatrix[cmCount] = collectSpliceObjects(collectOrderPos[J],
 									 sv.LINE,lexd)
 			collectionMatrix.append([]) # create space for next object
 			cmCount += 1 # increase collection matrix counter
 		elif(c.uid == sv.SPLINE.uid):
-			print('INF :: Collecting SPLINE')
+			print('INF : collecting SPLINE')
 			collectionMatrix[cmCount] = collectSpliceObjects(collectOrderPos[J],
 									 sv.SPLINE,lexd)
 			collectionMatrix.append([]) # create space for next collection
 			cmCount += 1 # Increase collection matrix counter
 		else:
-			print('ERR :: Could not collect the requseted lexeme')
+			print('ERR : could not collect the requseted lexeme')
 			print(collect)
 			exit()
 		#endif
 	#end while loop }
-	print('INF :: Finished collecting splice objects from splice')
+	print('INF : finished collecting splice objects from splice')
 	collectionMatrix.pop() # remove the last empty row []
 	#print('collectionMatrix :',collectionMatrix)
 	#print('collectOrder :',collectOrder)
@@ -754,13 +754,13 @@ def verifyGrammar(xi,cfg,collect,lexd):
 			corderpos : Collection order position
 			"""
 			cmat,corder,corderpos = collectSpliceObjectIndices(I,collect,lexd)
-			print('INF :: Collected indices of splice object')
-			print('------------------- COLLECTION MATRIX -------------------')
-			print(cmat)
-			print('------------------- COLLECTION ORDER  -------------------')
-			print(corder)
-			print('-------------------COLLECTION POSITION  -----------------')
-			print(corderpos)
+			#print('INF : collected indices of splice object')
+			#print('------------------- COLLECTION MATRIX -------------------')
+			#print(cmat)
+			#print('------------------- COLLECTION ORDER  -------------------')
+			#print(corder)
+			#print('-------------------COLLECTION POSITION  -----------------')
+			#print(corderpos)
 
 			# Since the collection is completed so skip those lexemes
 			#print(I) # test to see where we are
@@ -779,12 +779,12 @@ def verifyGrammar(xi,cfg,collect,lexd):
 			pass
 
 		else:
-			print('ERROR: CFG grammar not verified')
+			print('ERROR: grammar not verified...exiting...')
 			print('c : ',c)
 			print('lexd[I] : ',lexd[I])
 			exit()
 		#endif
 	#} end while i<n loop
-	print('RETURNING')
+	print('INF : returning wall...')
 	return xwall,ywall
 #------------------------------------------------------------------------------

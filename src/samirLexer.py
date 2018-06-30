@@ -169,7 +169,7 @@ def tokenizerStdV1(data_upper,data_original):
 				#print('Double encountered,dot at prev del') # So we skip to the next delimiter
 				i = I+nextdel
 			else:
-				print('collectInteger FAULT')
+				print('ERR : collectInteger FAULT')
 				exit()
 			#print('HITTING CONTINUE AT END')
 			t= ''
@@ -311,7 +311,7 @@ def tokenizerStdV1(data_upper,data_original):
 # \param data : text data collected from MIR file in an ASCII format
 # \return lexd : lexeme data stream that is needed by the parser
 def lexerStdV1(data):
-	print('STARTING LEXER')
+	print('INF : starting lexer...')
 	data_upper  = data.upper() # convert all text to upper case
 	lexd = tokenizerStdV1(data_upper,data) # send all text for tokenizing
 	#print(lexd)
