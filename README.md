@@ -1,5 +1,5 @@
 # SAMIR - System Agnostic Mesh Initializaiton Represantation
-
+<i>SAMIR(Sanskrit for gust of wind or gentle breeze)</i></br>
 For underpriviliged students like me, a structured grid generation language and
  interpreter for Computational Fluid Dynamics.</br>
 Yeah! You read me right.</br>
