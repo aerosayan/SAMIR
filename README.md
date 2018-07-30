@@ -7,18 +7,17 @@ I created a high level language interpreter without taking any classes in
 Compiler Design or even without being a CS major. </br>
 Many people said,"It is stupid! You can't do it!".</br>
 None of them understood the importance of the project...</br>
-I justified,"Dude, the fact that you think I can't do it; shows your limits and not mine".</br>
+I justified,"Dear friend, the fact that you think I can't do it; shows your limits and not mine".</br>
 Now, here we are.
 This is my best work till now.</br>
-#### Yeah! I am passionate about what I do. That's why I can do it far better than anyone else.</br>
-Am I arrogant ?</br>
-No,never.</br>
-It is my "I told you so" moment and I plan to do so.
+#### I am passionate about what I do. </br>
+
 This is gonna change the world in the future.</br>
-Just you wait, just you wait ... my name is...
+Just you wait, just you wait ... my name is... :)
 
 ## Author : Sayan Bhattacharjee
 ## Email  : aero.sayan@gmail.com
+## LinkedIn : www.linkedin.com/in/aerosayan/
 
 LICENSE : DEFAULT for now; will release in GPL v2 very soon.
 
@@ -29,7 +28,7 @@ in same condition. This is for them. Also, from my personal perspective, I am go
 do my Ph.D in distant future in hypersonic aerodynamics. So, I need this.
 
 ### How to use it?
-Dude... sorry, for now. I have recently ported the most of the code to Python and
+Dear... sorry, for now. I have recently ported the most of the code to Python and
 still there remains a lot of experimental features that are AMAZING!. But they
 experimental and can be quite dangerous to use,if the user is not fully understanding the concept.
 We users can be quite silly sometime.I need to silly proof it now.</br>
@@ -54,4 +53,4 @@ The scheme and the process in which SAMIR is processed can be illustrated as fol
 FIG : SAMIR scheme </br>
 ![scheme](mesh-pics/scheme.PNG)
 
-I promise to explain in detail later. But this is AWESOME !!!
+I promise to explain in detail later, if you do not know about basics of compiler design. But this is AWESOME !!!
